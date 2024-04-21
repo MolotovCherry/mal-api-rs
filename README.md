@@ -7,8 +7,6 @@ Currently this has full coverage of the following apis:
 - user_animelist
 - user_mangalist
 - user
-
-Not yet finished (I don't need them, but you can request them if you do)
 - forum
 
 Please report bugs if you encounter any.

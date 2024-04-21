@@ -81,17 +81,17 @@ pub struct SeasonList {
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct SingleAnimeItem {
-    node: AnimeNode,
+    pub node: AnimeNode,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct SingleMangaItem {
-    node: MangaNode,
+    pub node: MangaNode,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct SingleMangaSerializationItem {
-    node: MangaSerialization,
+    pub node: MangaSerialization,
 }
 
 #[skip_serializing_none]
@@ -242,28 +242,28 @@ pub struct AnimeNode {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AnimeRelation {
-    node: AnimeNode,
-    relation_type: RelationType,
-    relation_type_formatted: String,
+    pub node: AnimeNode,
+    pub relation_type: RelationType,
+    pub relation_type_formatted: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MangaRelation {
-    node: MangaNode,
-    relation_type: RelationType,
-    relation_type_formatted: String,
+    pub node: MangaNode,
+    pub relation_type: RelationType,
+    pub relation_type_formatted: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AnimeRecommendation {
-    node: AnimeNode,
-    num_recommendations: u64,
+    pub node: AnimeNode,
+    pub num_recommendations: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MangaRecommendation {
-    node: MangaNode,
-    num_recommendations: u64,
+    pub node: MangaNode,
+    pub num_recommendations: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -276,17 +276,17 @@ pub enum RelationType {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AnimeNodeStatistics {
-    status: AnimeNodeStatus,
-    num_list_users: u64,
+    pub status: AnimeNodeStatus,
+    pub num_list_users: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AnimeNodeStatus {
-    watching: u64,
-    completed: u64,
-    on_hold: u64,
-    dropped: u64,
-    plan_to_watch: u64,
+    pub watching: u64,
+    pub completed: u64,
+    pub on_hold: u64,
+    pub dropped: u64,
+    pub plan_to_watch: u64,
 }
 
 #[derive(Copy, Clone, Deserialize, Serialize, Debug, IntoStaticStr, EnumString, PartialEq)]
@@ -366,27 +366,27 @@ pub enum Nsfw {
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct Studio {
-    id: u32,
-    name: String,
+    pub id: u32,
+    pub name: String,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct MangaSerialization {
-    id: u32,
-    name: String,
+    pub id: u32,
+    pub name: String,
 }
 
 #[skip_serializing_none]
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq, Default)]
 pub struct Broadcast {
-    day_of_the_week: String,
-    start_time: Option<String>,
+    pub day_of_the_week: String,
+    pub start_time: Option<String>,
 }
 
 #[derive(Copy, Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct Season {
-    year: u32,
-    season: SeasonType,
+    pub year: u32,
+    pub season: SeasonType,
 }
 
 #[derive(Copy, Clone, Deserialize, Serialize, Debug, IntoStaticStr, EnumString, PartialEq)]
@@ -419,8 +419,8 @@ pub enum PublishingStatus {
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct Genre {
-    id: u32,
-    name: String,
+    pub id: u32,
+    pub name: String,
 }
 
 #[skip_serializing_none]
@@ -575,4 +575,104 @@ pub enum MangaRankingType {
 pub enum AnimeSeasonSort {
     AnimeScore,
     AnimeNumListUsers,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct ForumBoards {
+    pub categories: Vec<ForumBoard>,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct ForumBoard {
+    pub title: String,
+    pub boards: Vec<Board>,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct Board {
+    pub id: u32,
+    pub title: String,
+    pub description: String,
+    pub subboards: Vec<SubBoard>,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct SubBoard {
+    pub id: u32,
+    pub title: String,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct TopicDetail {
+    pub data: Topic,
+    pub paging: Paging,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct Topic {
+    pub title: String,
+    pub posts: Vec<Post>,
+    pub poll: Vec<Poll>,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct Post {
+    pub id: String,
+    pub number: u64,
+    pub created_at: String,
+    pub created_by: ForumUser,
+    pub body: String,
+    pub signature: String,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct ForumUser {
+    pub id: String,
+    pub name: String,
+    pub forum_avatar: String,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct Poll {
+    pub id: String,
+    pub question: String,
+    pub closed: String,
+    pub options: Vec<PollOption>,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct PollOption {
+    pub id: String,
+    pub text: String,
+    pub votes: String,
+}
+
+#[derive(Copy, Clone, Serialize, Debug, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum ForumSort {
+    Recent,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct ForumTopics {
+    pub data: Vec<FTopic>,
+    pub paging: Paging,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct ForumUserTopics {
+    pub id: String,
+    pub name: String,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
+pub struct FTopic {
+    pub id: u64,
+    pub title: String,
+    pub created_at: String,
+    pub created_by: ForumUserTopics,
+    pub number_of_posts: u32,
+    pub last_psot_created_at: String,
+    pub last_post_created_by: ForumUserTopics,
+    pub is_locked: u8,
 }
