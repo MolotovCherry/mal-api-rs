@@ -656,12 +656,12 @@ pub enum ForumSort {
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
 pub struct ForumTopics {
-    pub data: Vec<FTopic>,
+    pub data: Vec<ForumTopic>,
     pub paging: Paging,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
-pub struct FTopic {
+pub struct ForumTopic {
     pub id: u64,
     pub title: String,
     pub created_at: DateTime<Utc>,
