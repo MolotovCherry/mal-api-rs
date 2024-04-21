@@ -42,7 +42,7 @@ impl AnimeApiGet {
     pub fn list(self) -> AnimeListGet {
         AnimeListGet {
             client: self.client,
-            query: None,
+            q: None,
             limit: None,
             offset: None,
             fields: None,
@@ -95,15 +95,15 @@ pub struct AnimeListGet {
     #[serde(skip)]
     client: MalClient,
 
-    query: Option<String>,
+    q: Option<String>,
     limit: Option<u32>,
     offset: Option<u32>,
     fields: Option<String>,
 }
 
 impl AnimeListGet {
-    pub fn query(mut self, query: &str) -> Self {
-        self.query = Some(query.to_owned());
+    pub fn q(mut self, q: &str) -> Self {
+        self.q = Some(q.to_owned());
         self
     }
 
