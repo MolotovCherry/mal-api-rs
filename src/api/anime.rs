@@ -204,7 +204,15 @@ impl AnimeRankingGet {
     }
 
     pub async fn send(self) -> Result<RankingList, ApiError> {
-        self.client.http.get(ANIME_RANKING, false).await
+        assert!(
+            self.ranking_type.is_some(),
+            "ranking_type is a required param"
+        );
+
+        let query = serde_qs::to_string(&self)?;
+        let url = format!("{ANIME_RANKING}?{query}");
+
+        self.client.http.get(url, false).await
     }
 }
 
