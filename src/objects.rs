@@ -618,7 +618,7 @@ pub struct Topic {
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
 pub struct Post {
-    pub id: String,
+    pub id: u64,
     pub number: u64,
     pub created_at: DateTime<Utc>,
     pub created_by: ForumUser,
