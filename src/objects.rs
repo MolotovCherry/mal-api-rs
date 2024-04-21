@@ -661,7 +661,7 @@ pub struct ForumTopics {
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
 pub struct ForumUserTopics {
-    pub id: String,
+    pub id: u64,
     pub name: String,
 }
 
@@ -672,7 +672,7 @@ pub struct FTopic {
     pub created_at: String,
     pub created_by: ForumUserTopics,
     pub number_of_posts: u32,
-    pub last_psot_created_at: String,
+    pub last_post_created_at: String,
     pub last_post_created_by: ForumUserTopics,
     pub is_locked: bool,
 }
