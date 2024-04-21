@@ -1,7 +1,7 @@
 use derive_more::Display as DeriveDisplay;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use strum_macros::{Display, EnumString, IntoStaticStr};
+use strum::{Display, EnumString, IntoStaticStr};
 
 #[derive(Clone, Debug, Deserialize, Serialize, DeriveDisplay, PartialEq)]
 pub enum Username {

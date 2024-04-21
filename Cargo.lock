@@ -751,19 +751,15 @@ dependencies = [
  "const_format",
  "derive_more",
  "itertools",
- "log",
  "oauth2",
- "once_cell",
  "reqwest 0.12.4",
  "serde",
  "serde_json",
  "serde_qs",
  "serde_with",
  "strum",
- "strum_macros",
  "thiserror",
  "tokio",
- "url",
 ]
 
 [[package]]
