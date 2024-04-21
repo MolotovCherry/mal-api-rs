@@ -630,7 +630,7 @@ pub struct Post {
 pub struct ForumUser {
     pub id: u64,
     pub name: String,
-    pub forum_avatar: String,
+    pub forum_avatar: Option<String>,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
