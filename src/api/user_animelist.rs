@@ -4,8 +4,8 @@ use serde_with::skip_serializing_none;
 
 use crate::{
     api_request::ApiError,
-    objects::{AnimeList, AnimeSort, ReadStatus, Username},
-    MalClient, API_URL,
+    objects::{AnimeList, AnimeSort, Username},
+    MalClient, WatchStatus, API_URL,
 };
 
 pub const USER_ANIMELIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/animelist");
@@ -64,7 +64,7 @@ pub struct UserAnimeListApiPatch {
     #[serde(skip)]
     anime_id: Option<u64>,
 
-    status: Option<ReadStatus>,
+    status: Option<WatchStatus>,
     is_rewatching: Option<bool>,
     score: Option<u8>,
     num_watched_episodes: Option<u64>,
@@ -81,7 +81,7 @@ impl UserAnimeListApiPatch {
         self
     }
 
-    pub fn status(mut self, status: ReadStatus) -> Self {
+    pub fn status(mut self, status: WatchStatus) -> Self {
         self.status = Some(status);
         self
     }
@@ -162,7 +162,7 @@ pub struct UserAnimeListApiGet {
     #[serde(skip)]
     user_name: Option<Username>,
 
-    status: Option<ReadStatus>,
+    status: Option<WatchStatus>,
     sort: Option<AnimeSort>,
     limit: Option<u16>,
     offset: Option<u64>,
@@ -174,7 +174,7 @@ impl UserAnimeListApiGet {
         self
     }
 
-    pub fn status(mut self, status: ReadStatus) -> Self {
+    pub fn status(mut self, status: WatchStatus) -> Self {
         self.status = Some(status);
         self
     }
