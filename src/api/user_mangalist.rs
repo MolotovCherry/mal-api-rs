@@ -5,7 +5,7 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{MangaList, MangaSort, ReadStatus, Username},
-    MalClient, API_URL,
+    MalClient, API_URL, RUNTIME,
 };
 
 pub const USER_MANGALIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/mangalist");
@@ -139,6 +139,10 @@ impl UserMangaListApiPatch {
         let url = USER_MANGA_ID.replace("{MANGA_ID}", &self.manga_id.unwrap().to_string());
         self.client.http.patch(url, Some(&self), true).await
     }
+
+    pub fn send_blocking(self) -> Result<(), ApiError> {
+        RUNTIME.block_on(self.send())
+    }
 }
 
 #[derive(Debug)]
@@ -158,6 +162,10 @@ impl UserMangaListApiDelete {
 
         let url = USER_MANGA_ID.replace("{MANGA_ID}", &self.manga_id.unwrap().to_string());
         self.client.http.delete(url, true).await
+    }
+
+    pub fn send_blocking(self) -> Result<(), ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }
 
@@ -218,5 +226,9 @@ impl UserMangaListApiGet {
         };
 
         self.client.http.get(url, is_auth).await
+    }
+
+    pub fn send_blocking(self) -> Result<MangaList, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }

@@ -2,6 +2,7 @@ mod api;
 mod api_request;
 mod auth;
 mod objects;
+mod utils;
 
 use std::sync::Arc;
 
@@ -10,6 +11,7 @@ use reqwest::{Client, ClientBuilder};
 pub use api::*;
 pub use auth::*;
 pub use objects::*;
+use tokio::runtime::{Builder, Runtime};
 
 use self::{
     api::{
@@ -17,10 +19,18 @@ use self::{
         user_animelist::UserAnimeListApi, user_mangalist::UserMangaListApi,
     },
     api_request::ApiRequest,
+    utils::LazyLock,
 };
 
 pub const BASE_URL: &str = "https://myanimelist.net/v1";
 pub const API_URL: &str = "https://api.myanimelist.net/v2";
+
+pub static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
+    Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .expect("Failed building the Runtime")
+});
 
 #[derive(Debug, Clone)]
 pub struct MalClient {

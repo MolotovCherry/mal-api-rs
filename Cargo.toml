@@ -13,7 +13,7 @@ strum = { version = "0.26.2", features = ["derive", "derive"] }
 derive_more = "0.99.17"
 const_format = "0.2.32"
 chrono = { version = "0.4.38", features = ["serde"] }
-tokio = { version = "1", features = ["sync"] }
+tokio = { version = "1.37.0", features = ["sync", "rt-multi-thread"] }
 serde_with = "3.7.0"
 serde_qs = "0.13.0"
 itertools = "0.12.1"

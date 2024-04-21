@@ -13,7 +13,7 @@ use oauth2::{
 };
 use thiserror::Error;
 
-use crate::BASE_URL;
+use crate::{BASE_URL, RUNTIME};
 
 pub const AUTH_URL: &str = formatcp!("{BASE_URL}/oauth2/authorize");
 pub const TOKEN_URL: &str = formatcp!("{BASE_URL}/oauth2/token");
@@ -192,6 +192,16 @@ impl Auth {
         *lock = Box::new(move |url, state| Box::pin(f(url, state)));
     }
 
+    pub fn set_callback_blocking<
+        F: Fn(reqwest::Url, State) -> Fut + Send + 'static,
+        Fut: Future<Output = Result<(Code, State), Box<dyn std::error::Error>>> + 'static + Send,
+    >(
+        &self,
+        f: F,
+    ) {
+        RUNTIME.block_on(self.set_callback(f))
+    }
+
     /// Is the current state of this access token valid?
     ///
     /// This checks that the access token exists and its expiry is still valid.
@@ -249,6 +259,10 @@ impl Auth {
         }
     }
 
+    pub fn try_refresh_blocking(&self) -> Result<(), TokenError> {
+        RUNTIME.block_on(self.try_refresh())
+    }
+
     /// time in utc seconds when access token expires
     pub fn expires_at(&self) -> Option<u64> {
         *self.expires_at.lock().unwrap()
@@ -285,6 +299,10 @@ impl Auth {
         } else {
             Err(TokenError::Refresh)
         }
+    }
+
+    pub fn refresh_blocking(&self) -> Result<(), TokenError> {
+        RUNTIME.block_on(self.refresh())
     }
 
     /// regenerate fresh access and refresh tokens
@@ -343,6 +361,10 @@ impl Auth {
         *refresh_token = token.refresh_token().cloned();
 
         Ok(())
+    }
+
+    pub fn regenerate_blocking(&self) -> Result<(), TokenError> {
+        RUNTIME.block_on(self.regenerate())
     }
 }
 

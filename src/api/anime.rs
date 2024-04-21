@@ -3,12 +3,15 @@ use itertools::Itertools as _;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-use crate::objects::{
-    AnimeList, AnimeNode, AnimeRankingType, AnimeSeasonSort, AnimeSingleList, RankingList,
-    SeasonList, SeasonType,
-};
 use crate::API_URL;
 use crate::{api_request::ApiError, MalClient};
+use crate::{
+    objects::{
+        AnimeList, AnimeNode, AnimeRankingType, AnimeSeasonSort, AnimeSingleList, RankingList,
+        SeasonList, SeasonType,
+    },
+    RUNTIME,
+};
 
 const ANIME_URL: &str = formatcp!("{API_URL}/anime");
 const ANIME_ID: &str = formatcp!("{API_URL}/anime/{{ANIME_ID}}");
@@ -131,6 +134,10 @@ impl AnimeListGet {
 
         self.client.http.get(url, false).await
     }
+
+    pub fn send_blocking(self) -> Result<AnimeList, ApiError> {
+        RUNTIME.block_on(self.send())
+    }
 }
 
 #[skip_serializing_none]
@@ -165,6 +172,10 @@ impl AnimeDetailsGet {
         let url = format!("{url}?{query}");
 
         self.client.http.get(url, false).await
+    }
+
+    pub fn send_blocking(self) -> Result<AnimeNode, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }
 
@@ -213,6 +224,10 @@ impl AnimeRankingGet {
         let url = format!("{ANIME_RANKING}?{query}");
 
         self.client.http.get(url, false).await
+    }
+
+    pub fn send_blocking(self) -> Result<RankingList, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }
 
@@ -279,6 +294,10 @@ impl AnimeSeasonalGet {
 
         self.client.http.get(url, false).await
     }
+
+    pub fn send_blocking(self) -> Result<SeasonList, ApiError> {
+        RUNTIME.block_on(self.send())
+    }
 }
 
 #[skip_serializing_none]
@@ -314,5 +333,9 @@ impl AnimeSuggestedGet {
         let query = serde_qs::to_string(&self)?;
         let url = format!("{ANIME_SUGGESTIONS}?{query}");
         self.client.http.get(url, true).await
+    }
+
+    pub fn send_blocking(self) -> Result<AnimeSingleList, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }

@@ -4,6 +4,7 @@ use serde_with::skip_serializing_none;
 
 use crate::{
     api_request::ApiError, ForumBoards, ForumSort, ForumTopics, MalClient, TopicDetail, API_URL,
+    RUNTIME,
 };
 
 pub const FORUM_BOARDS: &str = formatcp!("{API_URL}/forum/boards");
@@ -72,6 +73,10 @@ impl ForumApiGetBoards {
     pub async fn send(self) -> Result<ForumBoards, ApiError> {
         self.client.http.get(FORUM_BOARDS, false).await
     }
+
+    pub fn send_blocking(self) -> Result<ForumBoards, ApiError> {
+        RUNTIME.block_on(self.send())
+    }
 }
 
 #[skip_serializing_none]
@@ -110,6 +115,10 @@ impl ForumApiGetTopicDetail {
 
         let url = format!("{url}?{query}");
         self.client.http.get(url, false).await
+    }
+
+    pub fn send_blocking(self) -> Result<TopicDetail, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }
 
@@ -175,5 +184,9 @@ impl ForumApiGetTopics {
         let url = format!("{FORUM_TOPICS}?{query}");
 
         self.client.http.get(url, false).await
+    }
+
+    pub fn send_blocking(self) -> Result<ForumTopics, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }

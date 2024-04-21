@@ -6,7 +6,7 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{User, Username},
-    MalClient, API_URL,
+    MalClient, API_URL, RUNTIME,
 };
 
 const USER_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}");
@@ -64,5 +64,9 @@ impl UserInformationGet {
         let url = format!("{url}?{query}");
 
         self.client.http.get(url, true).await
+    }
+
+    pub fn send_blocking(self) -> Result<User, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }

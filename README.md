@@ -9,6 +9,8 @@ Currently this has full coverage of the following apis:
 - user
 - forum
 
+The api is fully async, but has a blocking api for those who need sync.
+
 Please report bugs if you encounter any.
 
 ```rust

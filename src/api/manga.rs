@@ -5,6 +5,7 @@ use serde_with::skip_serializing_none;
 
 use crate::{
     api_request::ApiError, MalClient, MangaNode, MangaRankingType, MangaSingleList, API_URL,
+    RUNTIME,
 };
 
 pub const MANGA: &str = formatcp!("{API_URL}/manga");
@@ -104,6 +105,10 @@ impl MangaApiGetList {
         let url = format!("{MANGA}?{query}");
         self.client.http.get(url, false).await
     }
+
+    pub fn send_blocking(self) -> Result<MangaSingleList, ApiError> {
+        RUNTIME.block_on(self.send())
+    }
 }
 
 #[skip_serializing_none]
@@ -138,6 +143,10 @@ impl MangaApiGetDetails {
 
         let url = format!("{url}?{query}");
         self.client.http.get(url, false).await
+    }
+
+    pub fn send_blocking(self) -> Result<MangaNode, ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }
 
@@ -186,5 +195,9 @@ impl MangaApiGetRanking {
         let url = format!("{MANGA_RANKING}?{query}");
 
         self.client.http.get(url, false).await
+    }
+
+    pub fn send_blocking(self) -> Result<(), ApiError> {
+        RUNTIME.block_on(self.send())
     }
 }
