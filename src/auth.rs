@@ -39,9 +39,9 @@ pub enum AuthError {
     RefreshTokenExpiredError,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Code(pub String);
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct State(pub String);
 
 type Callback = Box<
