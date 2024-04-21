@@ -674,5 +674,5 @@ pub struct FTopic {
     pub number_of_posts: u32,
     pub last_psot_created_at: String,
     pub last_post_created_by: ForumUserTopics,
-    pub is_locked: u8,
+    pub is_locked: bool,
 }
