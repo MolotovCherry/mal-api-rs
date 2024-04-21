@@ -197,10 +197,19 @@ impl UserAnimeListApiGet {
     pub async fn send(self) -> Result<AnimeList, ApiError> {
         assert!(self.user_name.is_some(), "user_name is a required param");
 
+        let username = self.user_name.as_ref().unwrap().to_string();
+
         let query = serde_qs::to_string(&self)?;
-        let url = USER_ANIMELIST_URL.replace("{USER_NAME}", &self.user_name.unwrap().to_string());
+        let url = USER_ANIMELIST_URL.replace("{USER_NAME}", &username);
 
         let url = format!("{url}?{query}");
-        self.client.http.get(url, true).await
+
+        // use access token when Me, and client token when other users
+        let is_auth = match self.user_name.as_ref().unwrap() {
+            Username::Me => true,
+            Username::User(_) => false,
+        };
+
+        self.client.http.get(url, is_auth).await
     }
 }
