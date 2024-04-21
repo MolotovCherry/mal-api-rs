@@ -177,6 +177,11 @@ impl MangaApiGetRanking {
     }
 
     pub async fn send(self) -> Result<(), ApiError> {
+        assert!(
+            self.ranking_type.is_some(),
+            "ranking_type is a required param"
+        );
+
         let query = serde_qs::to_string(&self)?;
         let url = format!("{MANGA_RANKING}?{query}");
 
