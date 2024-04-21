@@ -1,3 +1,4 @@
+use chrono::prelude::{DateTime, Utc};
 use derive_more::Display as DeriveDisplay;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
@@ -172,8 +173,8 @@ pub struct MangaNode {
     pub num_list_users: Option<u32>,
     pub num_scoring_users: Option<u32>,
     pub nsfw: Option<Nsfw>,
-    pub created_at: Option<String>,
-    pub updated_at: Option<String>,
+    pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<Utc>>,
     pub media_type: Option<MediaTypeManga>,
     pub status: Option<PublishingStatus>,
     pub genres: Option<Vec<Genre>>,
@@ -218,8 +219,8 @@ pub struct AnimeNode {
     pub num_list_users: Option<u32>,
     pub num_scoring_users: Option<u32>,
     pub nsfw: Option<Nsfw>,
-    pub created_at: Option<String>,
-    pub updated_at: Option<String>,
+    pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<Utc>>,
     pub media_type: Option<MediaTypeAnime>,
     pub status: Option<AiringStatus>,
     pub genres: Option<Vec<Genre>>,
@@ -451,7 +452,7 @@ pub struct AnimeListStatus {
     pub rewatch_value: Option<u32>,
     pub tags: Option<Vec<String>>,
     pub comments: Option<String>,
-    pub updated_at: Option<String>,
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 #[skip_serializing_none]
@@ -470,7 +471,7 @@ pub struct MangaListStatus {
     pub reread_value: Option<u32>,
     pub tags: Option<Vec<String>>,
     pub comments: Option<String>,
-    pub updated_at: Option<String>,
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 // for parameter input on user animelist
@@ -513,7 +514,7 @@ pub struct User {
     pub gender: Option<String>,
     pub birthday: Option<String>,
     pub location: Option<String>,
-    pub joined_at: Option<String>,
+    pub joined_at: Option<DateTime<Utc>>,
     pub time_zone: Option<String>,
     pub is_supporter: Option<bool>,
     pub anime_statistics: Option<AnimeStatistics>,
@@ -619,7 +620,7 @@ pub struct Topic {
 pub struct Post {
     pub id: String,
     pub number: u64,
-    pub created_at: String,
+    pub created_at: DateTime<Utc>,
     pub created_by: ForumUser,
     pub body: String,
     pub signature: String,
@@ -669,10 +670,10 @@ pub struct ForumUserTopics {
 pub struct FTopic {
     pub id: u64,
     pub title: String,
-    pub created_at: String,
+    pub created_at: DateTime<Utc>,
     pub created_by: ForumUserTopics,
     pub number_of_posts: u32,
-    pub last_post_created_at: String,
+    pub last_post_created_at: DateTime<Utc>,
     pub last_post_created_by: ForumUserTopics,
     pub is_locked: bool,
 }
