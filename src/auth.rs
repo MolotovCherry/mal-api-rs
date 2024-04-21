@@ -44,25 +44,6 @@ pub struct Code(pub String);
 #[derive(Debug)]
 pub struct State(pub String);
 
-#[derive(Clone)]
-pub struct AppToken(String);
-
-impl AppToken {
-    /// Get the secret token
-    /// This could compromise safety. Use carefully
-    pub fn secret(&self) -> &str {
-        &self.0
-    }
-}
-
-impl fmt::Debug for AppToken {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            AppToken(_) => f.debug_tuple("AppToken").field(&"[Redacted]").finish(),
-        }
-    }
-}
-
 type Callback = Box<
     dyn Fn(
             reqwest::Url,
@@ -82,7 +63,6 @@ pub struct Auth {
     client: BasicClient,
     client_id: ClientId,
     client_secret: ClientSecret,
-    app_token: AppToken,
     access_token: Mutex<Option<AccessToken>>,
     refresh_token: Mutex<Option<RefreshToken>>,
     // time in utc seconds when access token expires
@@ -99,7 +79,6 @@ impl fmt::Debug for Auth {
             client,
             client_id,
             client_secret,
-            app_token,
             access_token,
             refresh_token,
             expires_at,
@@ -112,7 +91,6 @@ impl fmt::Debug for Auth {
             .field("client", &client)
             .field("client_id", &client_id)
             .field("client_secret", &client_secret)
-            .field("app_token", &app_token)
             .field("access_token", &access_token)
             .field("refresh_token", &refresh_token)
             .field("expires_at", &expires_at)
@@ -127,7 +105,6 @@ impl Auth {
     pub fn new(
         client_id: &str,
         client_secret: &str,
-        app_token: &str,
         redirect_uri: &str,
     ) -> Result<Self, TokenError> {
         let client = BasicClient::new(
@@ -142,7 +119,6 @@ impl Auth {
             client,
             client_id: ClientId::new(client_id.to_owned()),
             client_secret: ClientSecret::new(client_secret.to_owned()),
-            app_token: AppToken(app_token.to_owned()),
             access_token: Mutex::new(None),
             refresh_token: Mutex::new(None),
             expires_at: Mutex::new(None),
@@ -155,10 +131,6 @@ impl Auth {
         };
 
         Ok(slf)
-    }
-
-    pub fn app_token(&self) -> AppToken {
-        self.app_token.clone()
     }
 
     pub fn client_id(&self) -> ClientId {

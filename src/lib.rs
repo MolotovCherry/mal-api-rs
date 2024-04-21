@@ -33,43 +33,30 @@ impl MalClient {
     pub fn new(
         client_id: &str,
         client_secret: &str,
-        app_token: &str,
         redirect_uri: &str,
     ) -> Result<Self, MalClientError> {
-        Self::new_with(
-            client_id,
-            client_secret,
-            app_token,
-            redirect_uri,
-            |builder| {
-                builder
-                    .user_agent(concat!(
-                        env!("CARGO_PKG_NAME"),
-                        "/",
-                        env!("CARGO_PKG_VERSION"),
-                    ))
-                    .build()
-            },
-        )
+        Self::new_with(client_id, client_secret, redirect_uri, |builder| {
+            builder
+                .user_agent(concat!(
+                    env!("CARGO_PKG_NAME"),
+                    "/",
+                    env!("CARGO_PKG_VERSION"),
+                ))
+                .build()
+        })
     }
 
     /// Create client with custom reqwest settings (user agent for example)
     pub fn new_with(
         client_id: &str,
         client_secret: &str,
-        app_token: &str,
         redirect_uri: &str,
         builder_cb: impl Fn(ClientBuilder) -> Result<Client, reqwest::Error>,
     ) -> Result<Self, MalClientError> {
         let builder = reqwest::Client::builder();
         let http = builder_cb(builder)?;
 
-        let auth = Arc::new(Auth::new(
-            client_id,
-            client_secret,
-            app_token,
-            redirect_uri,
-        )?);
+        let auth = Arc::new(Auth::new(client_id, client_secret, redirect_uri)?);
         let http = ApiRequest::new(auth.clone(), http);
 
         let slf = Self { auth, http };
