@@ -637,7 +637,7 @@ pub struct ForumUser {
 pub struct Poll {
     pub id: u64,
     pub question: String,
-    pub closed: String,
+    pub closed: bool,
     pub options: Vec<PollOption>,
 }
 
