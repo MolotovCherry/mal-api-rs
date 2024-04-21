@@ -289,7 +289,7 @@ impl Auth {
 
     /// regenerate fresh access and refresh tokens
     pub async fn regenerate(&self) -> Result<(), TokenError> {
-        let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+        let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_plain();
 
         let scopes = self.scopes.lock().unwrap().clone();
 
