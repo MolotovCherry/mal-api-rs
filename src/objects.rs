@@ -645,7 +645,7 @@ pub struct Poll {
 pub struct PollOption {
     pub id: u64,
     pub text: String,
-    pub votes: String,
+    pub votes: u64,
 }
 
 #[derive(Copy, Clone, Serialize, Debug, PartialEq)]
