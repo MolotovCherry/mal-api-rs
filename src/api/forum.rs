@@ -39,7 +39,7 @@ impl ForumApiGet {
         }
     }
 
-    pub fn details(self) -> ForumApiGetTopicDetail {
+    pub fn topic_detail(self) -> ForumApiGetTopicDetail {
         ForumApiGetTopicDetail {
             client: self.client,
             offset: None,
@@ -48,7 +48,7 @@ impl ForumApiGet {
         }
     }
 
-    pub fn ranking(self) -> ForumApiGetTopics {
+    pub fn topics(self) -> ForumApiGetTopics {
         ForumApiGetTopics {
             client: self.client,
             board_id: None,
