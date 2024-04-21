@@ -628,14 +628,14 @@ pub struct Post {
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
 pub struct ForumUser {
-    pub id: String,
+    pub id: u64,
     pub name: String,
     pub forum_avatar: String,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
 pub struct Poll {
-    pub id: String,
+    pub id: u64,
     pub question: String,
     pub closed: String,
     pub options: Vec<PollOption>,
@@ -643,7 +643,7 @@ pub struct Poll {
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
 pub struct PollOption {
-    pub id: String,
+    pub id: u64,
     pub text: String,
     pub votes: String,
 }
