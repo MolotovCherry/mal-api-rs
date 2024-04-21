@@ -3,13 +3,13 @@ A Rust MyAnimeList api
 
 Currently this has full coverage of the following apis:
 - anime
+- manga
 - user_animelist
 - user_mangalist
 - user
 
 Not yet finished (I don't need them, but you can request them if you do)
 - forum
-- manga
 
 Please report bugs if you encounter any.
 

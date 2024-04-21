@@ -13,7 +13,7 @@ pub use objects::*;
 
 use self::{
     api::{
-        anime::AnimeApi, user::UserApi, user_animelist::UserAnimeListApi,
+        anime::AnimeApi, manga::MangaApi, user::UserApi, user_animelist::UserAnimeListApi,
         user_mangalist::UserMangaListApi,
     },
     api_request::ApiRequest,
@@ -66,6 +66,10 @@ impl MalClient {
 
     pub fn anime(&self) -> AnimeApi {
         AnimeApi::new(self.clone())
+    }
+
+    pub fn manga(&self) -> MangaApi {
+        MangaApi::new(self.clone())
     }
 
     pub fn user_animelist(&self) -> UserAnimeListApi {

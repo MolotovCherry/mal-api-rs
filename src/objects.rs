@@ -84,6 +84,16 @@ pub struct SingleAnimeItem {
     node: AnimeNode,
 }
 
+#[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
+pub struct SingleMangaItem {
+    node: MangaNode,
+}
+
+#[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
+pub struct SingleMangaSerializationItem {
+    node: MangaSerialization,
+}
+
 #[skip_serializing_none]
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq, Default)]
 pub struct MangaList {
@@ -102,6 +112,13 @@ pub struct AnimeList {
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq, Default)]
 pub struct AnimeSingleList {
     pub data: Vec<SingleAnimeItem>,
+    pub paging: Option<Paging>,
+}
+
+#[skip_serializing_none]
+#[derive(Clone, Deserialize, Serialize, Debug, PartialEq, Default)]
+pub struct MangaSingleList {
+    pub data: Vec<SingleMangaItem>,
     pub paging: Option<Paging>,
 }
 
@@ -155,15 +172,21 @@ pub struct MangaNode {
     pub num_list_users: Option<u32>,
     pub num_scoring_users: Option<u32>,
     pub nsfw: Option<Nsfw>,
-    pub genres: Option<Vec<Genre>>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
     pub media_type: Option<MediaTypeManga>,
     pub status: Option<PublishingStatus>,
+    pub genres: Option<Vec<Genre>>,
     pub my_list_status: Option<MangaListStatus>,
     pub num_volumes: Option<u32>,
     pub num_chapters: Option<u32>,
     pub authors: Option<Vec<Author>>,
+    pub pictures: Option<Vec<Picture>>,
+    pub background: Option<String>,
+    pub related_anime: Option<Vec<AnimeRelation>>,
+    pub related_manga: Option<Vec<MangaRelation>>,
+    pub recommendations: Option<Vec<MangaRecommendation>>,
+    pub serialization: Option<Vec<SingleMangaSerializationItem>>,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
@@ -234,6 +257,12 @@ pub struct MangaRelation {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AnimeRecommendation {
     node: AnimeNode,
+    num_recommendations: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct MangaRecommendation {
+    node: MangaNode,
     num_recommendations: u64,
 }
 
@@ -337,6 +366,12 @@ pub enum Nsfw {
 
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct Studio {
+    id: u32,
+    name: String,
+}
+
+#[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
+pub struct MangaSerialization {
     id: u32,
     name: String,
 }
@@ -507,7 +542,7 @@ pub struct AnimeStatistics {
 #[derive(Copy, Clone, Deserialize, Serialize, Debug, IntoStaticStr, EnumString, PartialEq)]
 #[serde(rename_all = "lowercase")]
 #[strum(serialize_all = "lowercase")]
-pub enum RankingType {
+pub enum AnimeRankingType {
     All,
     Airing,
     Upcoming,
@@ -515,6 +550,21 @@ pub enum RankingType {
     Ova,
     Movie,
     Special,
+    ByPopularity,
+    Favorite,
+}
+
+#[derive(Copy, Clone, Deserialize, Serialize, Debug, IntoStaticStr, EnumString, PartialEq)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
+pub enum MangaRankingType {
+    All,
+    Manga,
+    Novels,
+    OneShots,
+    Doujin,
+    Manhwa,
+    Manhua,
     ByPopularity,
     Favorite,
 }

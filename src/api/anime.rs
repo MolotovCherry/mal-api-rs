@@ -4,8 +4,8 @@ use serde::Serialize;
 use serde_with::skip_serializing_none;
 
 use crate::objects::{
-    AnimeList, AnimeNode, AnimeSeasonSort, AnimeSingleList, RankingList, RankingType, SeasonList,
-    SeasonType,
+    AnimeList, AnimeNode, AnimeRankingType, AnimeSeasonSort, AnimeSingleList, RankingList,
+    SeasonList, SeasonType,
 };
 use crate::API_URL;
 use crate::{api_request::ApiError, MalClient};
@@ -174,14 +174,14 @@ pub struct AnimeRankingGet {
     #[serde(skip)]
     client: MalClient,
 
-    ranking_type: Option<RankingType>,
+    ranking_type: Option<AnimeRankingType>,
     limit: Option<u16>,
     offset: Option<u64>,
     fields: Option<String>,
 }
 
 impl AnimeRankingGet {
-    pub fn ranking_type(mut self, ranking_type: RankingType) -> Self {
+    pub fn ranking_type(mut self, ranking_type: AnimeRankingType) -> Self {
         self.ranking_type = Some(ranking_type);
         self
     }
