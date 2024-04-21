@@ -613,7 +613,7 @@ pub struct TopicDetail {
 pub struct Topic {
     pub title: String,
     pub posts: Vec<Post>,
-    pub poll: Vec<Poll>,
+    pub poll: Poll,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
@@ -661,19 +661,13 @@ pub struct ForumTopics {
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Default)]
-pub struct ForumUserTopics {
-    pub id: u64,
-    pub name: String,
-}
-
-#[derive(Clone, Deserialize, Debug, PartialEq, Default)]
 pub struct FTopic {
     pub id: u64,
     pub title: String,
     pub created_at: DateTime<Utc>,
-    pub created_by: ForumUserTopics,
+    pub created_by: ForumUser,
     pub number_of_posts: u32,
     pub last_post_created_at: DateTime<Utc>,
-    pub last_post_created_by: ForumUserTopics,
+    pub last_post_created_by: ForumUser,
     pub is_locked: bool,
 }
