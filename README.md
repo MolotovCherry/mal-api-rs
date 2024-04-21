@@ -1,6 +1,18 @@
 # mal-api-rs
 A Rust MyAnimeList api
 
+Currently this has full coverage of the following apis:
+- anime
+- user_animelist
+- user_mangalist
+- user
+
+Not yet finished (I don't need them, but you can request them if you do)
+- forum
+- manga
+
+Please report bugs if you encounter any.
+
 ```rust
 // if you want to create your token with a scope, add scope before generating a token
 client.auth.add_scope("write:users");
