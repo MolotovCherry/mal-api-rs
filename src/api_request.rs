@@ -4,6 +4,7 @@ use reqwest::{Client, Error, IntoUrl, StatusCode};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use tracing::debug;
 
 use crate::Auth;
 
@@ -129,6 +130,8 @@ impl ApiRequest {
 
         let status = response.status();
         let text = response.text().await?;
+
+        debug!(status = status.as_u16(), response = text, "mal reponse");
 
         match status {
             StatusCode::BAD_REQUEST => {
