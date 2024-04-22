@@ -21,6 +21,8 @@ impl UserApi {
         Self { client: mal_client }
     }
 
+    /// User get endpoints
+    /// https://myanimelist.net/apiconfig/references/api/v2#tag/user
     pub fn get(&self) -> UserApiGet {
         UserApiGet {
             client: self.client.clone(),
@@ -33,6 +35,8 @@ pub struct UserApiGet {
 }
 
 impl UserApiGet {
+    /// GET user information
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get
     pub fn information(self) -> UserInformationGet {
         UserInformationGet {
             client: self.client,
@@ -41,6 +45,8 @@ impl UserApiGet {
     }
 }
 
+/// GET user information
+/// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct UserInformationGet {
@@ -58,6 +64,7 @@ impl UserInformationGet {
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<User, ApiError> {
         let url = USER_URL.replace("{USER_NAME}", &Username::Me.to_string());
         let query = serde_qs::to_string(&self)?;
@@ -66,6 +73,7 @@ impl UserInformationGet {
         self.client.http.get(url, true).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<User, ApiError> {
         RUNTIME.block_on(self.send())
     }

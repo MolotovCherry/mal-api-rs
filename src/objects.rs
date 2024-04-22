@@ -705,14 +705,23 @@ pub struct AnimeStatistics {
 #[serde(rename_all = "lowercase")]
 #[strum(serialize_all = "lowercase")]
 pub enum AnimeRankingType {
+    /// Top Anime Series
     All,
+    /// Top Airing Anime
     Airing,
+    /// Top Upcoming Anime
     Upcoming,
+    /// Top Anime TV Series
     Tv,
+    /// Top Anime OVA Series
     Ova,
+    /// Top Anime Movies
     Movie,
+    /// Top Anime Special
     Special,
+    /// Top Anime by Popularity
     ByPopularity,
+    /// Top Favorited Anime
     Favorite,
 }
 
@@ -720,14 +729,23 @@ pub enum AnimeRankingType {
 #[serde(rename_all = "lowercase")]
 #[strum(serialize_all = "lowercase")]
 pub enum MangaRankingType {
+    /// All
     All,
+    /// Top Manga
     Manga,
+    /// Top Novels
     Novels,
+    /// Top One-shots
     OneShots,
+    /// Top Doujinshi
     Doujin,
+    /// Top Manhwa
     Manhwa,
+    /// Top Manhua
     Manhua,
+    /// Most Popular
     ByPopularity,
+    /// Most Favorited
     Favorite,
 }
 

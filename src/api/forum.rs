@@ -21,6 +21,8 @@ impl ForumApi {
         Self { client }
     }
 
+    /// Forum GET endpoints
+    /// https://myanimelist.net/apiconfig/references/api/v2#tag/forum
     pub fn get(&self) -> ForumApiGet {
         ForumApiGet {
             client: self.client.clone(),
@@ -28,18 +30,24 @@ impl ForumApi {
     }
 }
 
+/// Forum GET endpoints
+/// https://myanimelist.net/apiconfig/references/api/v2#tag/forum
 #[derive(Debug)]
 pub struct ForumApiGet {
     client: MalClient,
 }
 
 impl ForumApiGet {
+    /// GET forum boards.
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/forum_boards_get
     pub fn boards(self) -> ForumApiGetBoards {
         ForumApiGetBoards {
             client: self.client,
         }
     }
 
+    /// GET forum topic detail.
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get
     pub fn topic_detail(self) -> ForumApiGetTopicDetail {
         ForumApiGetTopicDetail {
             client: self.client,
@@ -49,6 +57,8 @@ impl ForumApiGet {
         }
     }
 
+    /// GET forum topics.
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get
     pub fn topics(self) -> ForumApiGetTopics {
         ForumApiGetTopics {
             client: self.client,
@@ -70,10 +80,12 @@ pub struct ForumApiGetBoards {
 }
 
 impl ForumApiGetBoards {
+    /// Send the request.
     pub async fn send(self) -> Result<ForumBoards, ApiError> {
         self.client.http.get(FORUM_BOARDS, false).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<ForumBoards, ApiError> {
         RUNTIME.block_on(self.send())
     }
@@ -92,21 +104,26 @@ pub struct ForumApiGetTopicDetail {
 }
 
 impl ForumApiGetTopicDetail {
+    /// The topic id. This parameter is required.
     pub fn topic_id(mut self, id: u64) -> Self {
         self.topic_id = Some(id);
         self
     }
 
+    /// limit <= 100
+    /// Default: 100
     pub fn limit(mut self, limit: u8) -> Self {
         self.limit = Some(limit.clamp(0, 100));
         self
     }
 
+    /// Default: 0
     pub fn offset(mut self, offset: u64) -> Self {
         self.offset = Some(offset);
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<TopicDetail, ApiError> {
         assert!(self.topic_id.is_some(), "topic_id is a required param");
 
@@ -117,6 +134,7 @@ impl ForumApiGetTopicDetail {
         self.client.http.get(url, false).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<TopicDetail, ApiError> {
         RUNTIME.block_on(self.send())
     }
@@ -139,46 +157,56 @@ pub struct ForumApiGetTopics {
 }
 
 impl ForumApiGetTopics {
+    /// The board id.
     pub fn board_id(mut self, id: u64) -> Self {
         self.board_id = Some(id);
         self
     }
 
+    /// The subboard id.
     pub fn subboard_id(mut self, id: u64) -> Self {
         self.subboard_id = Some(id);
         self
     }
 
+    /// limit <= 100
+    /// Default: 100
     pub fn limit(mut self, limit: u8) -> Self {
         self.limit = Some(limit.clamp(0, 100));
         self
     }
 
+    /// Default: 0
     pub fn offset(mut self, offset: u64) -> Self {
         self.offset = Some(offset);
         self
     }
 
+    /// Default [ForumSort::Recent]
     pub fn sort(mut self, sort: ForumSort) -> Self {
         self.sort = Some(sort);
         self
     }
 
+    /// The query.
     pub fn q(mut self, q: &str) -> Self {
         self.q = Some(q.to_owned());
         self
     }
 
+    /// The topic user name.
     pub fn topic_user_name(mut self, topic_user_name: &str) -> Self {
         self.topic_user_name = Some(topic_user_name.to_owned());
         self
     }
 
+    /// The user name.
     pub fn user_name(mut self, user_name: &str) -> Self {
         self.user_name = Some(user_name.to_owned());
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<ForumTopics, ApiError> {
         let query = serde_qs::to_string(&self)?;
         let url = format!("{FORUM_TOPICS}?{query}");
@@ -186,6 +214,7 @@ impl ForumApiGetTopics {
         self.client.http.get(url, false).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<ForumTopics, ApiError> {
         RUNTIME.block_on(self.send())
     }

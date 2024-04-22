@@ -22,6 +22,8 @@ impl UserAnimeListApi {
         Self { client: mal_client }
     }
 
+    /// GET user animelist
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get
     pub fn get(&self) -> UserAnimeListApiGet {
         UserAnimeListApiGet {
             client: self.client.clone(),
@@ -35,6 +37,15 @@ impl UserAnimeListApi {
         }
     }
 
+    /// PATCH user animelist
+    ///
+    /// Add specified anime to my anime list.
+    ///
+    /// If specified anime already exists, update its status.
+    ///
+    /// This endpoint updates only values specified by the parameter.
+    ///
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put
     pub fn put(&self) -> UserAnimeListApiPut {
         UserAnimeListApiPut {
             client: self.client.clone(),
@@ -51,6 +62,13 @@ impl UserAnimeListApi {
         }
     }
 
+    /// DELETE user animelist item
+    ///
+    /// If the specified anime does not exist in user's anime list, this endpoint does nothing and returns 404 Not Found.
+    ///
+    /// So be careful when retrying.
+    ///
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete
     pub fn delete(&self) -> UserAnimeListApiDelete {
         UserAnimeListApiDelete {
             client: self.client.clone(),
@@ -59,6 +77,15 @@ impl UserAnimeListApi {
     }
 }
 
+/// PATCH user animelist
+///
+/// Add specified anime to my anime list.
+///
+/// If specified anime already exists, update its status.
+///
+/// This endpoint updates only values specified by the parameter.
+///
+/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct UserAnimeListApiPut {
@@ -79,6 +106,7 @@ pub struct UserAnimeListApiPut {
 }
 
 impl UserAnimeListApiPut {
+    /// The anime id to update. This parameter is required.
     pub fn anime_id(mut self, id: u64) -> Self {
         self.anime_id = Some(id);
         self
@@ -129,6 +157,7 @@ impl UserAnimeListApiPut {
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<AnimeListItem, ApiError> {
         assert!(self.anime_id.is_some(), "anime_id is a required param");
 
@@ -136,11 +165,19 @@ impl UserAnimeListApiPut {
         self.client.http.put(url, Some(&self), true).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<AnimeListItem, ApiError> {
         RUNTIME.block_on(self.send())
     }
 }
 
+/// DELETE user animelist item
+///
+/// If the specified anime does not exist in user's anime list, this endpoint does nothing and returns 404 Not Found.
+///
+/// So be careful when retrying.
+///
+/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete
 #[derive(Debug)]
 pub struct UserAnimeListApiDelete {
     client: MalClient,
@@ -148,11 +185,13 @@ pub struct UserAnimeListApiDelete {
 }
 
 impl UserAnimeListApiDelete {
+    /// The anime id in the list to delete. This parameter is required.
     pub fn anime_id(mut self, id: u64) -> Self {
         self.anime_id = Some(id);
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<(), ApiError> {
         assert!(self.anime_id.is_some(), "anime_id is a required param");
 
@@ -160,11 +199,14 @@ impl UserAnimeListApiDelete {
         self.client.http.delete(url, true).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<(), ApiError> {
         RUNTIME.block_on(self.send())
     }
 }
 
+/// GET user animelist
+/// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct UserAnimeListApiGet {
@@ -182,11 +224,14 @@ pub struct UserAnimeListApiGet {
 }
 
 impl UserAnimeListApiGet {
+    /// User name. This parameter is required.
     pub fn user_name(mut self, user_name: Username) -> Self {
         self.user_name = Some(user_name);
         self
     }
 
+    /// Filters returned anime list by these statuses.
+    /// To return all anime, don't specify this field.
     pub fn status(mut self, status: WatchStatus) -> Self {
         self.status = Some(status);
         self
@@ -197,11 +242,14 @@ impl UserAnimeListApiGet {
         self
     }
 
+    /// Default: 100
+    /// The maximum value is 1000.
     pub fn limit(mut self, limit: u16) -> Self {
         self.limit = Some(limit.clamp(0, 1000));
         self
     }
 
+    /// Default: 0
     pub fn offset(mut self, offset: u64) -> Self {
         self.offset = Some(offset);
         self
@@ -214,11 +262,13 @@ impl UserAnimeListApiGet {
         self
     }
 
+    /// Whether to return nsfw material.
     pub fn nsfw(mut self, nsfw: bool) -> Self {
         self.nsfw = Some(nsfw);
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<AnimeList, ApiError> {
         assert!(self.user_name.is_some(), "user_name is a required param");
 
@@ -235,6 +285,7 @@ impl UserAnimeListApiGet {
         self.client.http.get(url, is_auth).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<AnimeList, ApiError> {
         RUNTIME.block_on(self.send())
     }

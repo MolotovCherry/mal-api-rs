@@ -22,6 +22,8 @@ impl MangaApi {
         Self { client }
     }
 
+    /// The manga GET endpoints.
+    /// https://myanimelist.net/apiconfig/references/api/v2#tag/manga
     pub fn get(&self) -> MangaApiGet {
         MangaApiGet {
             client: self.client.clone(),
@@ -35,6 +37,8 @@ pub struct MangaApiGet {
 }
 
 impl MangaApiGet {
+    /// GET manga list.
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get
     pub fn list(self) -> MangaApiGetList {
         MangaApiGetList {
             client: self.client,
@@ -45,6 +49,8 @@ impl MangaApiGet {
         }
     }
 
+    /// GET manga details.
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get
     pub fn details(self) -> MangaApiGetDetails {
         MangaApiGetDetails {
             client: self.client,
@@ -53,6 +59,8 @@ impl MangaApiGet {
         }
     }
 
+    /// GET manga ranking.
+    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get
     pub fn ranking(self) -> MangaApiGetRanking {
         MangaApiGetRanking {
             client: self.client,
@@ -64,6 +72,8 @@ impl MangaApiGet {
     }
 }
 
+/// GET manga list.
+/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct MangaApiGetList {
@@ -77,16 +87,20 @@ pub struct MangaApiGetList {
 }
 
 impl MangaApiGetList {
+    /// Search.
     pub fn q(mut self, q: &str) -> Self {
         self.q = Some(q.to_owned());
         self
     }
 
+    /// Default: 100
+    /// The maximum value is 100.
     pub fn limit(mut self, limit: u16) -> Self {
         self.limit = Some(limit);
         self
     }
 
+    /// Default: 0
     pub fn offset(mut self, offset: u64) -> Self {
         self.offset = Some(offset);
         self
@@ -99,6 +113,7 @@ impl MangaApiGetList {
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<MangaSingleList, ApiError> {
         let query = serde_qs::to_string(&self)?;
 
@@ -106,11 +121,14 @@ impl MangaApiGetList {
         self.client.http.get(url, false).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<MangaSingleList, ApiError> {
         RUNTIME.block_on(self.send())
     }
 }
 
+/// GET manga details.
+/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct MangaApiGetDetails {
@@ -123,6 +141,7 @@ pub struct MangaApiGetDetails {
 }
 
 impl MangaApiGetDetails {
+    /// The manga id. This parameter is required.
     pub fn manga_id(mut self, id: u64) -> Self {
         self.manga_id = Some(id);
         self
@@ -135,6 +154,7 @@ impl MangaApiGetDetails {
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<MangaNode, ApiError> {
         assert!(self.manga_id.is_some(), "manga_id is a required param");
 
@@ -145,11 +165,14 @@ impl MangaApiGetDetails {
         self.client.http.get(url, false).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<MangaNode, ApiError> {
         RUNTIME.block_on(self.send())
     }
 }
 
+/// GET manga ranking.
+/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct MangaApiGetRanking {
@@ -163,16 +186,20 @@ pub struct MangaApiGetRanking {
 }
 
 impl MangaApiGetRanking {
+    /// The ranking type. This parameter is required.
     pub fn ranking_type(mut self, ranking: MangaRankingType) -> Self {
         self.ranking_type = Some(ranking);
         self
     }
 
+    /// Default: 100
+    /// The maximum value is 500.
     pub fn limit(mut self, limit: u16) -> Self {
         self.limit = Some(limit.clamp(0, 500));
         self
     }
 
+    /// Default: 0
     pub fn offset(mut self, offset: u64) -> Self {
         self.offset = Some(offset);
         self
@@ -185,6 +212,7 @@ impl MangaApiGetRanking {
         self
     }
 
+    /// Send the request.
     pub async fn send(self) -> Result<(), ApiError> {
         assert!(
             self.ranking_type.is_some(),
@@ -197,6 +225,7 @@ impl MangaApiGetRanking {
         self.client.http.get(url, false).await
     }
 
+    /// Send the request.
     pub fn send_blocking(self) -> Result<(), ApiError> {
         RUNTIME.block_on(self.send())
     }

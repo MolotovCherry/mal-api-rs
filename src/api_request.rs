@@ -25,7 +25,7 @@ pub enum ApiError {
     InvalidParameters,
     #[error("Access is forbidden (DoS detected etc.)")]
     Forbidden,
-    #[error("URL not found")]
+    #[error("Not found")]
     NotFound,
     #[error("Status code : {0:?}")]
     StatusCode(StatusCode),
