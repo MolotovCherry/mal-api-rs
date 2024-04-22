@@ -33,8 +33,12 @@ pub enum ApiError {
     ParseError(#[from] serde_json::Error),
     #[error("access token missing")]
     AccessTokenError,
-    #[error("{0} - {}: {}", .1.error, .1.message)]
-    Message(StatusCode, ApiRequestError),
+    #[error("{status} - {error}: {message}")]
+    ErrorMessage {
+        status: StatusCode,
+        error: String,
+        message: String,
+    },
     #[error("{0}")]
     QuerySerError(#[from] serde_qs::Error),
 }
@@ -46,9 +50,9 @@ impl From<reqwest::Error> for ApiError {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct ApiRequestError {
-    pub error: String,
-    pub message: String,
+struct ApiRequestError {
+    error: String,
+    message: String,
 }
 
 #[derive(Clone, Debug)]
@@ -133,6 +137,8 @@ impl ApiRequest {
 
         debug!(status = status.as_u16(), response = text, "mal reponse");
 
+        let error = serde_json::from_str::<ApiRequestError>(&text);
+
         match status {
             StatusCode::BAD_REQUEST => {
                 return Err(ApiError::InvalidParameters);
@@ -153,11 +159,25 @@ impl ApiRequest {
             // only one that is allowed to pass
             StatusCode::OK => (),
 
-            v => return Err(ApiError::StatusCode(v)),
+            v => {
+                if let Ok(error) = error {
+                    return Err(ApiError::ErrorMessage {
+                        status: v,
+                        error: error.error,
+                        message: error.message,
+                    });
+                } else {
+                    return Err(ApiError::StatusCode(v));
+                }
+            }
         }
 
-        if let Ok(error) = serde_json::from_str::<ApiRequestError>(&text) {
-            return Err(ApiError::Message(status, error));
+        if let Ok(error) = error {
+            return Err(ApiError::ErrorMessage {
+                status: StatusCode::OK,
+                error: error.error,
+                message: error.message,
+            });
         }
 
         let data = serde_json::from_str(&text)?;
