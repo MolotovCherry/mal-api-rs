@@ -1,6 +1,9 @@
-use chrono::prelude::{DateTime, Utc};
+use chrono::{
+    prelude::{DateTime, Utc},
+    NaiveDate,
+};
 use derive_more::Display as DeriveDisplay;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::skip_serializing_none;
 use strum::{Display, EnumString, IntoStaticStr};
 
@@ -488,7 +491,8 @@ pub struct AnimeListItem {
     pub tags: Vec<String>,
     pub comments: String,
     pub updated_at: DateTime<Utc>,
-    pub start_date: DateTime<Utc>,
+    #[serde(deserialize_with = "date")]
+    pub start_date: NaiveDate,
 }
 
 // for parameter input on user mangalist
@@ -506,7 +510,8 @@ pub struct MangaListItem {
     pub tags: Vec<String>,
     pub comments: String,
     pub updated_at: DateTime<Utc>,
-    pub start_date: DateTime<Utc>,
+    #[serde(deserialize_with = "date")]
+    pub start_date: NaiveDate,
 }
 
 #[skip_serializing_none]
@@ -674,4 +679,12 @@ pub struct ForumTopic {
     pub last_post_created_at: DateTime<Utc>,
     pub last_post_created_by: ForumUser,
     pub is_locked: bool,
+}
+
+fn date<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    NaiveDate::parse_from_str(&s, "%Y-%m-%d").map_err(serde::de::Error::custom)
 }
