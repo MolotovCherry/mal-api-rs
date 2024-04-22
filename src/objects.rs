@@ -476,33 +476,35 @@ pub struct MangaListStatus {
 
 // for parameter input on user animelist
 #[skip_serializing_none]
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Default)]
+#[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct AnimeListItem {
-    pub status: Option<WatchStatus>,
-    pub is_rewatching: Option<bool>,
-    pub score: Option<u8>,
-    pub num_watched_episodes: Option<u32>,
-    pub priority: Option<u8>,
-    pub num_times_rewatched: Option<u32>,
-    pub rewatch_value: Option<u8>,
-    pub tags: Option<String>,
-    pub comments: Option<String>,
+    pub status: WatchStatus,
+    pub is_rewatching: bool,
+    pub score: u8,
+    pub num_episodes_watched: u32,
+    pub priority: u8,
+    pub num_times_rewatched: u32,
+    pub rewatch_value: u8,
+    pub tags: String,
+    pub comments: String,
+    pub updated_at: DateTime<Utc>,
 }
 
 // for parameter input on user mangalist
 #[skip_serializing_none]
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Default)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct MangaListItem {
-    pub status: Option<ReadStatus>,
-    pub is_rereading: Option<bool>,
-    pub score: Option<u8>,
-    pub num_volumes_read: Option<u32>,
-    pub num_chapters_read: Option<u32>,
-    pub priority: Option<u8>,
-    pub num_times_reread: Option<u32>,
-    pub reread_value: Option<u8>,
-    pub tags: Option<String>,
-    pub comments: Option<String>,
+    pub status: ReadStatus,
+    pub is_rereading: bool,
+    pub score: u8,
+    pub num_volumes_read: u32,
+    pub num_chapters_read: u32,
+    pub priority: u8,
+    pub num_times_reread: u32,
+    pub reread_value: u8,
+    pub tags: Vec<String>,
+    pub comments: String,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[skip_serializing_none]

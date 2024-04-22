@@ -5,7 +5,7 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{MangaList, MangaSort, ReadStatus, Username},
-    MalClient, API_URL, RUNTIME,
+    MalClient, MangaListItem, API_URL, RUNTIME,
 };
 
 pub const USER_MANGALIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/mangalist");
@@ -133,14 +133,14 @@ impl UserMangaListApiPut {
         self
     }
 
-    pub async fn send(self) -> Result<(), ApiError> {
+    pub async fn send(self) -> Result<MangaListItem, ApiError> {
         assert!(self.manga_id.is_some(), "manga_id is a required param");
 
         let url = USER_MANGA_ID.replace("{MANGA_ID}", &self.manga_id.unwrap().to_string());
         self.client.http.put(url, Some(&self), true).await
     }
 
-    pub fn send_blocking(self) -> Result<(), ApiError> {
+    pub fn send_blocking(self) -> Result<MangaListItem, ApiError> {
         RUNTIME.block_on(self.send())
     }
 }

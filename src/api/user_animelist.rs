@@ -5,7 +5,7 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{AnimeList, AnimeSort, Username},
-    MalClient, WatchStatus, API_URL, RUNTIME,
+    AnimeListItem, MalClient, WatchStatus, API_URL, RUNTIME,
 };
 
 pub const USER_ANIMELIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/animelist");
@@ -126,14 +126,14 @@ impl UserAnimeListApiPut {
         self
     }
 
-    pub async fn send(self) -> Result<(), ApiError> {
+    pub async fn send(self) -> Result<AnimeListItem, ApiError> {
         assert!(self.anime_id.is_some(), "anime_id is a required param");
 
         let url = USER_ANIME_ID.replace("{ANIME_ID}", &self.anime_id.unwrap().to_string());
         self.client.http.put(url, Some(&self), true).await
     }
 
-    pub fn send_blocking(self) -> Result<(), ApiError> {
+    pub fn send_blocking(self) -> Result<AnimeListItem, ApiError> {
         RUNTIME.block_on(self.send())
     }
 }
