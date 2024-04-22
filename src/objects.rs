@@ -485,9 +485,10 @@ pub struct AnimeListItem {
     pub priority: u8,
     pub num_times_rewatched: u32,
     pub rewatch_value: u8,
-    pub tags: String,
+    pub tags: Vec<String>,
     pub comments: String,
     pub updated_at: DateTime<Utc>,
+    pub start_date: DateTime<Utc>,
 }
 
 // for parameter input on user mangalist
@@ -505,6 +506,7 @@ pub struct MangaListItem {
     pub tags: Vec<String>,
     pub comments: String,
     pub updated_at: DateTime<Utc>,
+    pub start_date: DateTime<Utc>,
 }
 
 #[skip_serializing_none]
