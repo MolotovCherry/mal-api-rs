@@ -220,10 +220,7 @@ impl UserMangaListApiGet {
         let url = format!("{url}?{query}");
 
         // use access token when Me, and client token when other users
-        let is_auth = match self.user_name.as_ref().unwrap() {
-            Username::Me => true,
-            Username::User(_) => false,
-        };
+        let is_auth = matches!(self.user_name.as_ref().unwrap(), Username::Me);
 
         self.client.http.get(url, is_auth).await
     }
