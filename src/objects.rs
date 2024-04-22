@@ -464,7 +464,7 @@ pub enum GenreType {
     CGDCT,
     #[serde(rename = "Combat Sports")]
     CombatSports,
-    CrossDressing,
+    Crossdressing,
     Delinquents,
     Detective,
     Educational,
