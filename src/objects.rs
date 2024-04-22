@@ -827,28 +827,24 @@ where
 {
     let s = String::deserialize(deserializer)?;
     let num_hyphens = s.chars().filter(|c| *c == '-').count();
+    let split = s.split('-').collect::<Vec<_>>();
 
-    let date = if num_hyphens == 0 {
-        // only the year
-        PartialDate {
-            year: s.parse().unwrap(),
-            month: None,
-            day: None,
-        }
-    } else if num_hyphens == 1 {
-        let split = s.split('-').collect::<Vec<_>>();
-        PartialDate {
-            year: split[0].parse().unwrap(),
-            month: Some(split[1].parse().unwrap()),
-            day: None,
-        }
-    } else {
-        let split = s.split('-').collect::<Vec<_>>();
-        PartialDate {
-            year: split[0].parse().unwrap(),
-            month: Some(split[1].parse().unwrap()),
-            day: Some(split[2].parse().unwrap()),
-        }
+    let date = PartialDate {
+        year: if num_hyphens >= 1 {
+            split[0].parse().unwrap()
+        } else {
+            s.parse().unwrap()
+        },
+        month: if num_hyphens >= 1 {
+            split[1].parse().ok()
+        } else {
+            None
+        },
+        day: if num_hyphens == 2 {
+            split[2].parse().ok()
+        } else {
+            None
+        },
     };
 
     Ok(date)
