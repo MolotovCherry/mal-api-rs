@@ -5,8 +5,8 @@ use serde_with::skip_serializing_none;
 
 use crate::{
     api_request::ApiError,
-    objects::{AnimeList, AnimeSort, Username},
-    AnimeListItem, MalClient, WatchStatus, API_URL, RUNTIME,
+    objects::{AnimeList, AnimeListItem, AnimeSort, Username, WatchStatus},
+    MalClient, API_URL, RUNTIME,
 };
 
 pub const USER_ANIMELIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/animelist");
@@ -23,7 +23,7 @@ impl UserAnimeListApi {
     }
 
     /// GET user animelist
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get>
     pub fn get(&self) -> UserAnimeListApiGet {
         UserAnimeListApiGet {
             client: self.client.clone(),
@@ -45,7 +45,7 @@ impl UserAnimeListApi {
     ///
     /// This endpoint updates only values specified by the parameter.
     ///
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put>
     pub fn put(&self) -> UserAnimeListApiPut {
         UserAnimeListApiPut {
             client: self.client.clone(),
@@ -68,7 +68,7 @@ impl UserAnimeListApi {
     ///
     /// So be careful when retrying.
     ///
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete>
     pub fn delete(&self) -> UserAnimeListApiDelete {
         UserAnimeListApiDelete {
             client: self.client.clone(),
@@ -85,7 +85,7 @@ impl UserAnimeListApi {
 ///
 /// This endpoint updates only values specified by the parameter.
 ///
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct UserAnimeListApiPut {
@@ -177,7 +177,7 @@ impl UserAnimeListApiPut {
 ///
 /// So be careful when retrying.
 ///
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete>
 #[derive(Debug)]
 pub struct UserAnimeListApiDelete {
     client: MalClient,
@@ -206,7 +206,7 @@ impl UserAnimeListApiDelete {
 }
 
 /// GET user animelist
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct UserAnimeListApiGet {

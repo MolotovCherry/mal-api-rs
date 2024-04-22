@@ -15,8 +15,8 @@ use thiserror::Error;
 
 use crate::{BASE_URL, RUNTIME};
 
-pub const AUTH_URL: &str = formatcp!("{BASE_URL}/oauth2/authorize");
-pub const TOKEN_URL: &str = formatcp!("{BASE_URL}/oauth2/token");
+const AUTH_URL: &str = formatcp!("{BASE_URL}/oauth2/authorize");
+const TOKEN_URL: &str = formatcp!("{BASE_URL}/oauth2/token");
 
 /// Error type for Authorization methods
 #[derive(Error, Debug, PartialEq)]
@@ -153,7 +153,7 @@ impl Auth {
         self.refresh_token.lock().unwrap().clone()
     }
 
-    /// Manually set the refresh token. This is handled automatically by [`refresh`], [`refresh_blocking`], [`regenerate`], and [`regenerate_blocking`].
+    /// Manually set the refresh token. This is handled automatically by [`refresh()`], [`refresh_blocking()`], [`regenerate()`], and [`regenerate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -163,7 +163,7 @@ impl Auth {
         *lock = token.map(|t| RefreshToken::new(t.to_owned()));
     }
 
-    /// Manually set the access token. This is handled automatically by [`refresh`], [`refresh_blocking`], [`regenerate`], and [`regenerate_blocking`].
+    /// Manually set the access token. This is handled automatically by [`refresh()`], [`refresh_blocking()`], [`regenerate()`], and [`regenerate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -174,7 +174,7 @@ impl Auth {
     }
 
     /// Updates the access token expiry time. Duration is how long after NOW it will after in.
-    /// This is handled automatically by [`refresh`], [`refresh_blocking`], [`regenerate`], and [`regenerate_blocking`].
+    /// This is handled automatically by [`refresh()`], [`refresh_blocking()`], [`regenerate()`], and [`regenerate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -185,7 +185,7 @@ impl Auth {
     }
 
     /// Updates the access token expiry time. Duration is how long after NOW it will after in.
-    /// This is handled automatically by [`refresh`], [`refresh_blocking`], [`regenerate`], and [`regenerate_blocking`].
+    /// This is handled automatically by [`refresh()`], [`refresh_blocking()`], [`regenerate()`], and [`regenerate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -201,12 +201,12 @@ impl Auth {
         lock.push(Scope::new(scope.to_owned()));
     }
 
-    /// Set the callback used when running [`regenerate`].
+    /// Set the callback used when running [`regenerate()`].
     /// This passes in a [`State`] representing the client state this callback is looking for.
     /// You can know which client request is the correct client because the states match each other.
     ///
     /// You may return success from this function ONLY if the state is correct.
-    /// You may want to make this timeout so [`regenerate`] doesn't block forever.
+    /// You may want to make this timeout so [`regenerate()`] doesn't block forever.
     pub async fn set_callback<
         F: Fn(reqwest::Url, State) -> Fut + Send + 'static,
         Fut: Future<Output = Result<(Code, State), Box<dyn std::error::Error>>> + 'static + Send,
@@ -218,12 +218,12 @@ impl Auth {
         *lock = Box::new(move |url, state| Box::pin(f(url, state)));
     }
 
-    /// Set the callback used when running [`regenerate`].
+    /// Set the callback used when running [`regenerate()`].
     /// This passes in a [`State`] representing the client state this callback is looking for.
     /// You can know which client request is the correct client because the states match each other.
     ///
     /// You may return success from this function ONLY if the state is correct.
-    /// You may want to make this timeout so [`regenerate`] doesn't block forever.
+    /// You may want to make this timeout so [`regenerate()`] doesn't block forever.
     pub fn set_callback_blocking<
         F: Fn(reqwest::Url, State) -> Fut + Send + 'static,
         Fut: Future<Output = Result<(Code, State), Box<dyn std::error::Error>>> + 'static + Send,

@@ -9,7 +9,7 @@ use tracing::debug;
 use crate::Auth;
 
 #[derive(Copy, Clone, Debug)]
-pub enum RequestMethod {
+pub(crate) enum RequestMethod {
     Get,
     Put,
     Delete,
@@ -52,7 +52,7 @@ pub struct ApiRequestError {
 }
 
 #[derive(Clone, Debug)]
-pub struct ApiRequest {
+pub(crate) struct ApiRequest {
     auth: Arc<Auth>,
     http: reqwest::Client,
 }

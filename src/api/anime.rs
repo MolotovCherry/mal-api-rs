@@ -30,7 +30,7 @@ impl AnimeApi {
     }
 
     /// Anime GET endpoints
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/anime
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
     pub fn get(&self) -> AnimeApiGet {
         AnimeApiGet {
             client: self.client.clone(),
@@ -39,7 +39,7 @@ impl AnimeApi {
 }
 
 /// Anime GET endpoints
-/// https://myanimelist.net/apiconfig/references/api/v2#tag/anime
+/// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
 #[derive(Debug)]
 pub struct AnimeApiGet {
     client: MalClient,
@@ -47,7 +47,7 @@ pub struct AnimeApiGet {
 
 impl AnimeApiGet {
     /// GET anime list.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get>
     pub fn list(self) -> AnimeListGet {
         AnimeListGet {
             client: self.client,
@@ -59,7 +59,7 @@ impl AnimeApiGet {
     }
 
     /// GET anime details.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get>
     pub fn details(self) -> AnimeDetailsGet {
         AnimeDetailsGet {
             client: self.client,
@@ -69,7 +69,7 @@ impl AnimeApiGet {
     }
 
     /// GET anime ranking.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get>
     pub fn ranking(self) -> AnimeRankingGet {
         AnimeRankingGet {
             client: self.client,
@@ -81,7 +81,7 @@ impl AnimeApiGet {
     }
 
     /// GET seasonal anime.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get>
     pub fn seasonal(self) -> AnimeSeasonalGet {
         AnimeSeasonalGet {
             client: self.client,
@@ -95,7 +95,7 @@ impl AnimeApiGet {
     }
 
     /// GET suggested anime.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get>
     pub fn suggested(self) -> AnimeSuggestedGet {
         AnimeSuggestedGet {
             client: self.client,
@@ -107,7 +107,7 @@ impl AnimeApiGet {
 }
 
 /// GET anime list.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct AnimeListGet {
@@ -163,7 +163,7 @@ impl AnimeListGet {
 }
 
 /// GET anime details.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct AnimeDetailsGet {
@@ -207,7 +207,7 @@ impl AnimeDetailsGet {
 }
 
 /// GET anime ranking.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct AnimeRankingGet {
@@ -267,7 +267,7 @@ impl AnimeRankingGet {
 }
 
 /// GET seasonal anime.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct AnimeSeasonalGet {
@@ -345,7 +345,7 @@ impl AnimeSeasonalGet {
 }
 
 /// GET suggested anime.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct AnimeSuggestedGet {

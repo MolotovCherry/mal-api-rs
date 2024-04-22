@@ -22,7 +22,7 @@ impl UserApi {
     }
 
     /// User get endpoints
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/user
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user>
     pub fn get(&self) -> UserApiGet {
         UserApiGet {
             client: self.client.clone(),
@@ -36,7 +36,7 @@ pub struct UserApiGet {
 
 impl UserApiGet {
     /// GET user information
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get>
     pub fn information(self) -> UserInformationGet {
         UserInformationGet {
             client: self.client,
@@ -46,7 +46,7 @@ impl UserApiGet {
 }
 
 /// GET user information
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct UserInformationGet {

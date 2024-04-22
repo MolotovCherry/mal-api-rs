@@ -1,7 +1,7 @@
-mod api;
-mod api_request;
-mod auth;
-mod objects;
+pub mod api;
+pub mod api_request;
+pub mod auth;
+pub mod objects;
 mod utils;
 
 use std::sync::Arc;
@@ -15,17 +15,14 @@ use crate::{
         user_animelist::UserAnimeListApi, user_mangalist::UserMangaListApi,
     },
     api_request::ApiRequest,
+    auth::{Auth, TokenError},
     utils::LazyLock,
 };
-pub use api::*;
-pub use api_request::ApiError;
-pub use auth::*;
-pub use objects::*;
 
-pub const BASE_URL: &str = "https://myanimelist.net/v1";
-pub const API_URL: &str = "https://api.myanimelist.net/v2";
+const BASE_URL: &str = "https://myanimelist.net/v1";
+const API_URL: &str = "https://api.myanimelist.net/v2";
 
-pub static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
+static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
     Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -35,7 +32,7 @@ pub static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
 /// A MyAnimeList Client.
 ///
 /// For proper usage of the api, please read the myanimelist docs:
-/// https://myanimelist.net/apiconfig/references/api/v2
+/// <https://myanimelist.net/apiconfig/references/api/v2>
 #[derive(Debug, Clone)]
 pub struct MalClient {
     /// Holds oauth2 information. You are required to call functions on this to handle
@@ -81,37 +78,37 @@ impl MalClient {
     }
 
     /// The anime endpoint
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/anime
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
     pub fn anime(&self) -> AnimeApi {
         AnimeApi::new(self.clone())
     }
 
     /// The manga endpoint
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/manga
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/manga>
     pub fn manga(&self) -> MangaApi {
         MangaApi::new(self.clone())
     }
 
     /// The user-animelist endpoint
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/user-animelist
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user-animelist>
     pub fn user_animelist(&self) -> UserAnimeListApi {
         UserAnimeListApi::new(self.clone())
     }
 
     /// The user-mangalist endpoint
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/user-mangalist
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user-mangalist>
     pub fn user_mangalist(&self) -> UserMangaListApi {
         UserMangaListApi::new(self.clone())
     }
 
     /// The user endpoint
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/user
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user>
     pub fn user(&self) -> UserApi {
         UserApi::new(self.clone())
     }
 
     /// The forum endpoint
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/forum
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/forum>
     pub fn forum(&self) -> ForumApi {
         ForumApi::new(self.clone())
     }

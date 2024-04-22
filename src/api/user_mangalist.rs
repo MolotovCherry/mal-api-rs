@@ -5,8 +5,8 @@ use serde_with::skip_serializing_none;
 
 use crate::{
     api_request::ApiError,
-    objects::{MangaList, MangaSort, ReadStatus, Username},
-    MalClient, MangaListItem, API_URL, RUNTIME,
+    objects::{MangaList, MangaListItem, MangaSort, ReadStatus, Username},
+    MalClient, API_URL, RUNTIME,
 };
 
 pub const USER_MANGALIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/mangalist");
@@ -23,7 +23,7 @@ impl UserMangaListApi {
     }
 
     /// GET user manga list
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get>
     pub fn get(&self) -> UserMangaListApiGet {
         UserMangaListApiGet {
             client: self.client.clone(),
@@ -43,7 +43,7 @@ impl UserMangaListApi {
     /// If specified manga already exists, update its status.
     ///
     /// This endpoint updates only values specified by the parameter.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put>
     pub fn put(&self) -> UserMangaListApiPut {
         UserMangaListApiPut {
             client: self.client.clone(),
@@ -66,7 +66,7 @@ impl UserMangaListApi {
     ///
     /// So be careful when retrying.
     ///
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_delete
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_delete>
     pub fn delete(&self) -> UserMangaListApiDelete {
         UserMangaListApiDelete {
             client: self.client.clone(),
@@ -81,7 +81,7 @@ impl UserMangaListApi {
 /// If specified manga already exists, update its status.
 ///
 /// This endpoint updates only values specified by the parameter.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct UserMangaListApiPut {
@@ -181,7 +181,7 @@ impl UserMangaListApiPut {
 ///
 /// So be careful when retrying.
 ///
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_delete
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_delete>
 #[derive(Debug)]
 pub struct UserMangaListApiDelete {
     client: MalClient,
@@ -210,7 +210,7 @@ impl UserMangaListApiDelete {
 }
 
 /// GET user manga list
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
 pub struct UserMangaListApiGet {

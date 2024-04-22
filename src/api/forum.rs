@@ -3,8 +3,9 @@ use serde::Serialize;
 use serde_with::skip_serializing_none;
 
 use crate::{
-    api_request::ApiError, ForumBoards, ForumSort, ForumTopics, MalClient, TopicDetail, API_URL,
-    RUNTIME,
+    api_request::ApiError,
+    objects::{ForumBoards, ForumSort, ForumTopics, TopicDetail},
+    MalClient, API_URL, RUNTIME,
 };
 
 pub const FORUM_BOARDS: &str = formatcp!("{API_URL}/forum/boards");
@@ -22,7 +23,7 @@ impl ForumApi {
     }
 
     /// Forum GET endpoints
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/forum
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/forum>
     pub fn get(&self) -> ForumApiGet {
         ForumApiGet {
             client: self.client.clone(),
@@ -31,7 +32,7 @@ impl ForumApi {
 }
 
 /// Forum GET endpoints
-/// https://myanimelist.net/apiconfig/references/api/v2#tag/forum
+/// <https://myanimelist.net/apiconfig/references/api/v2#tag/forum>
 #[derive(Debug)]
 pub struct ForumApiGet {
     client: MalClient,
@@ -39,7 +40,7 @@ pub struct ForumApiGet {
 
 impl ForumApiGet {
     /// GET forum boards.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/forum_boards_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/forum_boards_get>
     pub fn boards(self) -> ForumApiGetBoards {
         ForumApiGetBoards {
             client: self.client,
@@ -47,7 +48,7 @@ impl ForumApiGet {
     }
 
     /// GET forum topic detail.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get>
     pub fn topic_detail(self) -> ForumApiGetTopicDetail {
         ForumApiGetTopicDetail {
             client: self.client,
@@ -58,7 +59,7 @@ impl ForumApiGet {
     }
 
     /// GET forum topics.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get>
     pub fn topics(self) -> ForumApiGetTopics {
         ForumApiGetTopics {
             client: self.client,

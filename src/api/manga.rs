@@ -4,8 +4,9 @@ use serde::Serialize;
 use serde_with::skip_serializing_none;
 
 use crate::{
-    api_request::ApiError, MalClient, MangaNode, MangaRankingType, MangaSingleList, API_URL,
-    RUNTIME,
+    api_request::ApiError,
+    objects::{MangaNode, MangaRankingType, MangaSingleList},
+    MalClient, API_URL, RUNTIME,
 };
 
 pub const MANGA: &str = formatcp!("{API_URL}/manga");
@@ -23,7 +24,7 @@ impl MangaApi {
     }
 
     /// The manga GET endpoints.
-    /// https://myanimelist.net/apiconfig/references/api/v2#tag/manga
+    /// <https://myanimelist.net/apiconfig/references/api/v2#tag/manga>
     pub fn get(&self) -> MangaApiGet {
         MangaApiGet {
             client: self.client.clone(),
@@ -38,7 +39,7 @@ pub struct MangaApiGet {
 
 impl MangaApiGet {
     /// GET manga list.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get>
     pub fn list(self) -> MangaApiGetList {
         MangaApiGetList {
             client: self.client,
@@ -50,7 +51,7 @@ impl MangaApiGet {
     }
 
     /// GET manga details.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get>
     pub fn details(self) -> MangaApiGetDetails {
         MangaApiGetDetails {
             client: self.client,
@@ -60,7 +61,7 @@ impl MangaApiGet {
     }
 
     /// GET manga ranking.
-    /// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get
+    /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get>
     pub fn ranking(self) -> MangaApiGetRanking {
         MangaApiGetRanking {
             client: self.client,
@@ -73,7 +74,7 @@ impl MangaApiGet {
 }
 
 /// GET manga list.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct MangaApiGetList {
@@ -128,7 +129,7 @@ impl MangaApiGetList {
 }
 
 /// GET manga details.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct MangaApiGetDetails {
@@ -172,7 +173,7 @@ impl MangaApiGetDetails {
 }
 
 /// GET manga ranking.
-/// https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get
+/// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
 pub struct MangaApiGetRanking {
