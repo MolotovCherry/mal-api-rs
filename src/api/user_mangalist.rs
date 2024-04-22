@@ -1,4 +1,5 @@
 use const_format::formatcp;
+use itertools::Itertools as _;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
@@ -29,6 +30,8 @@ impl UserMangaListApi {
             sort: None,
             limit: None,
             offset: None,
+            fields: None,
+            nsfw: None,
         }
     }
 
@@ -181,6 +184,8 @@ pub struct UserMangaListApiGet {
     sort: Option<MangaSort>,
     limit: Option<u16>,
     offset: Option<u64>,
+    fields: Option<String>,
+    nsfw: Option<bool>,
 }
 
 impl UserMangaListApiGet {
@@ -206,6 +211,18 @@ impl UserMangaListApiGet {
 
     pub fn offset(mut self, offset: u64) -> Self {
         self.offset = Some(offset);
+        self
+    }
+
+    pub fn fields<I: IntoIterator<Item = impl AsRef<str>>>(mut self, fields: I) -> Self {
+        let fields = fields.into_iter().map(|f| f.as_ref().to_string()).join(",");
+
+        self.fields = Some(fields);
+        self
+    }
+
+    pub fn nsfw(mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
         self
     }
 

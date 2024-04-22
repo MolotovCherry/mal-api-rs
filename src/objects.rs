@@ -1,7 +1,4 @@
-use chrono::{
-    prelude::{DateTime, Utc},
-    NaiveDate,
-};
+use chrono::prelude::{DateTime, NaiveTime, Utc};
 use derive_more::Display as DeriveDisplay;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_with::skip_serializing_none;
@@ -162,13 +159,16 @@ pub struct AnimeItem {
 
 #[skip_serializing_none]
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq, Default)]
+#[serde(default)]
 pub struct MangaNode {
     pub id: u32,
     pub title: String,
     pub main_picture: Option<Picture>,
     pub alternative_titles: Option<AlternativeTitles>,
-    pub start_date: Option<String>,
-    pub end_date: Option<String>,
+    #[serde(deserialize_with = "date_opt")]
+    pub start_date: Option<PartialDate>,
+    #[serde(deserialize_with = "date_opt")]
+    pub end_date: Option<PartialDate>,
     pub synopsis: Option<String>,
     pub mean: Option<f64>,
     pub rank: Option<u32>,
@@ -208,13 +208,16 @@ pub struct Person {
 
 #[skip_serializing_none]
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq, Default)]
+#[serde(default)]
 pub struct AnimeNode {
     pub id: u32,
     pub title: String,
     pub main_picture: Option<Picture>,
     pub alternative_titles: Option<AlternativeTitles>,
-    pub start_date: Option<String>,
-    pub end_date: Option<String>,
+    #[serde(deserialize_with = "date_opt")]
+    pub start_date: Option<PartialDate>,
+    #[serde(deserialize_with = "date_opt")]
+    pub end_date: Option<PartialDate>,
     pub synopsis: Option<String>,
     pub mean: Option<f64>,
     pub rank: Option<u32>,
@@ -381,10 +384,23 @@ pub struct MangaSerialization {
 }
 
 #[skip_serializing_none]
-#[derive(Clone, Deserialize, Serialize, Debug, PartialEq, Default)]
+#[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct Broadcast {
-    pub day_of_the_week: String,
-    pub start_time: Option<String>,
+    pub day_of_the_week: DayOfWeek,
+    pub start_time: NaiveTime,
+}
+
+#[derive(Copy, Clone, Deserialize, Serialize, Debug, IntoStaticStr, EnumString, PartialEq)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
+pub enum DayOfWeek {
+    Sunday,
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
 }
 
 #[derive(Copy, Clone, Deserialize, Serialize, Debug, PartialEq)]
@@ -424,7 +440,116 @@ pub enum PublishingStatus {
 #[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct Genre {
     pub id: u32,
-    pub name: String,
+    pub name: GenreType,
+}
+
+#[derive(Copy, Clone, Deserialize, Serialize, Debug, IntoStaticStr, EnumString, PartialEq)]
+pub enum GenreType {
+    // genres
+    Action,
+    Adventure,
+    #[serde(rename = "Avant Garde")]
+    AvantGarde,
+    #[serde(rename = "Award Winning")]
+    AwardWinning,
+    #[serde(rename = "Boys Love")]
+    BoysLove,
+    Comedy,
+    Drama,
+    Fantasy,
+    #[serde(rename = "Girls Love")]
+    GirlsLove,
+    Gourmet,
+    Horror,
+    Mystery,
+    Romance,
+    #[serde(rename = "Sci-Fi")]
+    SciFi,
+    #[serde(rename = "Slice of Life")]
+    SliceOfLife,
+    Sports,
+    Supernatural,
+    Suspense,
+    // explicit genres
+    Ecchi,
+    Erotica,
+    Hentai,
+    // themes
+    #[serde(rename = "Adult Cast")]
+    AdultCast,
+    Anthropomorphic,
+    CGDCT,
+    #[serde(rename = "Combat Sports")]
+    CombatSports,
+    CrossDressing,
+    Delinquents,
+    Detective,
+    Educational,
+    #[serde(rename = "Gag Humor")]
+    GagHumor,
+    Gore,
+    Harem,
+    #[serde(rename = "High Stakes Game")]
+    HighStakesGame,
+    Historical,
+    #[serde(rename = "Idols (Female)")]
+    IdolsFemale,
+    #[serde(rename = "Idols (Male)")]
+    IdolsMale,
+    Isekai,
+    Iyashikei,
+    #[serde(rename = "Love Polygon")]
+    LovePolygon,
+    #[serde(rename = "Magical Sex Shift")]
+    MagicalSexShift,
+    #[serde(rename = "MahouShoujo")]
+    MahouShoujo,
+    #[serde(rename = "Martial Arts")]
+    MartialArts,
+    Mecha,
+    Medical,
+    Military,
+    Music,
+    Mythology,
+    #[serde(rename = "Organized Crime")]
+    OrganizedCrime,
+    #[serde(rename = "Otaku Culture")]
+    OtakuCulture,
+    Parody,
+    #[serde(rename = "Performing Arts")]
+    PerformingArts,
+    Psychological,
+    Racing,
+    Reincarnation,
+    #[serde(rename = "Reverse Harem")]
+    ReverseHarem,
+    #[serde(rename = "Romantic Subtext")]
+    RomanticSubtext,
+    Samurai,
+    School,
+    Showbiz,
+    Space,
+    #[serde(rename = "Strategy Game")]
+    StrategyGame,
+    #[serde(rename = "Super Power")]
+    SuperPower,
+    Survival,
+    #[serde(rename = "Team Sports")]
+    TeamSports,
+    #[serde(rename = "Time Travel")]
+    TimeTravel,
+    Vampire,
+    #[serde(rename = "Video Game")]
+    VideoGame,
+    #[serde(rename = "Visual Arts")]
+    VisualArts,
+    Workplace,
+    // demographics
+    Josei,
+    Kids,
+    Seinen,
+    Shoujo,
+    Shounen,
 }
 
 #[skip_serializing_none]
@@ -492,7 +617,7 @@ pub struct AnimeListItem {
     pub comments: String,
     pub updated_at: DateTime<Utc>,
     #[serde(deserialize_with = "date")]
-    pub start_date: NaiveDate,
+    pub start_date: PartialDate,
 }
 
 // for parameter input on user mangalist
@@ -511,7 +636,7 @@ pub struct MangaListItem {
     pub comments: String,
     pub updated_at: DateTime<Utc>,
     #[serde(deserialize_with = "date")]
-    pub start_date: NaiveDate,
+    pub start_date: PartialDate,
 }
 
 #[skip_serializing_none]
@@ -681,10 +806,50 @@ pub struct ForumTopic {
     pub is_locked: bool,
 }
 
-fn date<'de, D>(deserializer: D) -> Result<NaiveDate, D::Error>
+#[skip_serializing_none]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+pub struct PartialDate {
+    pub year: u16,
+    pub month: Option<u16>,
+    pub day: Option<u16>,
+}
+
+fn date_opt<'de, D>(deserializer: D) -> Result<Option<PartialDate>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Some(date(deserializer)?))
+}
+
+fn date<'de, D>(deserializer: D) -> Result<PartialDate, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    NaiveDate::parse_from_str(&s, "%Y-%m-%d").map_err(serde::de::Error::custom)
+    let num_hyphens = s.chars().filter(|c| *c == '-').count();
+
+    let date = if num_hyphens == 0 {
+        // only the year
+        PartialDate {
+            year: s.parse().unwrap(),
+            month: None,
+            day: None,
+        }
+    } else if num_hyphens == 1 {
+        let split = s.split('-').collect::<Vec<_>>();
+        PartialDate {
+            year: split[0].parse().unwrap(),
+            month: Some(split[1].parse().unwrap()),
+            day: None,
+        }
+    } else {
+        let split = s.split('-').collect::<Vec<_>>();
+        PartialDate {
+            year: split[0].parse().unwrap(),
+            month: Some(split[1].parse().unwrap()),
+            day: Some(split[2].parse().unwrap()),
+        }
+    };
+
+    Ok(date)
 }
