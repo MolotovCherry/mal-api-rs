@@ -23,6 +23,7 @@ impl UserAnimeListApi {
     }
 
     /// GET user animelist
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get>
     pub fn get(&self) -> UserAnimeListApiGet {
         UserAnimeListApiGet {
@@ -206,6 +207,7 @@ impl UserAnimeListApiDelete {
 }
 
 /// GET user animelist
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]

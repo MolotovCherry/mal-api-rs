@@ -30,6 +30,7 @@ impl AnimeApi {
     }
 
     /// Anime GET endpoints
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
     pub fn get(&self) -> AnimeApiGet {
         AnimeApiGet {
@@ -39,6 +40,7 @@ impl AnimeApi {
 }
 
 /// Anime GET endpoints
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
 #[derive(Debug)]
 pub struct AnimeApiGet {
@@ -47,6 +49,7 @@ pub struct AnimeApiGet {
 
 impl AnimeApiGet {
     /// GET anime list.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get>
     pub fn list(self) -> AnimeListGet {
         AnimeListGet {
@@ -59,6 +62,7 @@ impl AnimeApiGet {
     }
 
     /// GET anime details.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get>
     pub fn details(self) -> AnimeDetailsGet {
         AnimeDetailsGet {
@@ -69,6 +73,7 @@ impl AnimeApiGet {
     }
 
     /// GET anime ranking.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get>
     pub fn ranking(self) -> AnimeRankingGet {
         AnimeRankingGet {
@@ -81,6 +86,7 @@ impl AnimeApiGet {
     }
 
     /// GET seasonal anime.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get>
     pub fn seasonal(self) -> AnimeSeasonalGet {
         AnimeSeasonalGet {
@@ -95,6 +101,7 @@ impl AnimeApiGet {
     }
 
     /// GET suggested anime.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get>
     pub fn suggested(self) -> AnimeSuggestedGet {
         AnimeSuggestedGet {
@@ -107,6 +114,7 @@ impl AnimeApiGet {
 }
 
 /// GET anime list.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
@@ -163,6 +171,7 @@ impl AnimeListGet {
 }
 
 /// GET anime details.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
@@ -207,6 +216,7 @@ impl AnimeDetailsGet {
 }
 
 /// GET anime ranking.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
@@ -267,6 +277,7 @@ impl AnimeRankingGet {
 }
 
 /// GET seasonal anime.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
@@ -345,6 +356,7 @@ impl AnimeSeasonalGet {
 }
 
 /// GET suggested anime.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]

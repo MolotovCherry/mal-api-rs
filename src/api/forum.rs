@@ -23,6 +23,7 @@ impl ForumApi {
     }
 
     /// Forum GET endpoints
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/forum>
     pub fn get(&self) -> ForumApiGet {
         ForumApiGet {
@@ -32,6 +33,7 @@ impl ForumApi {
 }
 
 /// Forum GET endpoints
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#tag/forum>
 #[derive(Debug)]
 pub struct ForumApiGet {
@@ -40,6 +42,7 @@ pub struct ForumApiGet {
 
 impl ForumApiGet {
     /// GET forum boards.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/forum_boards_get>
     pub fn boards(self) -> ForumApiGetBoards {
         ForumApiGetBoards {
@@ -48,6 +51,7 @@ impl ForumApiGet {
     }
 
     /// GET forum topic detail.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topic_get>
     pub fn topic_detail(self) -> ForumApiGetTopicDetail {
         ForumApiGetTopicDetail {
@@ -59,6 +63,7 @@ impl ForumApiGet {
     }
 
     /// GET forum topics.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/forum_topics_get>
     pub fn topics(self) -> ForumApiGetTopics {
         ForumApiGetTopics {

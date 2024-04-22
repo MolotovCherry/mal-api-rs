@@ -24,6 +24,7 @@ impl MangaApi {
     }
 
     /// The manga GET endpoints.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/manga>
     pub fn get(&self) -> MangaApiGet {
         MangaApiGet {
@@ -39,6 +40,7 @@ pub struct MangaApiGet {
 
 impl MangaApiGet {
     /// GET manga list.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get>
     pub fn list(self) -> MangaApiGetList {
         MangaApiGetList {
@@ -51,6 +53,7 @@ impl MangaApiGet {
     }
 
     /// GET manga details.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get>
     pub fn details(self) -> MangaApiGetDetails {
         MangaApiGetDetails {
@@ -61,6 +64,7 @@ impl MangaApiGet {
     }
 
     /// GET manga ranking.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get>
     pub fn ranking(self) -> MangaApiGetRanking {
         MangaApiGetRanking {
@@ -74,6 +78,7 @@ impl MangaApiGet {
 }
 
 /// GET manga list.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
@@ -129,6 +134,7 @@ impl MangaApiGetList {
 }
 
 /// GET manga details.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
@@ -173,6 +179,7 @@ impl MangaApiGetDetails {
 }
 
 /// GET manga ranking.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]

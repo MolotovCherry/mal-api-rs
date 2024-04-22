@@ -23,6 +23,7 @@ impl UserMangaListApi {
     }
 
     /// GET user manga list
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get>
     pub fn get(&self) -> UserMangaListApiGet {
         UserMangaListApiGet {
@@ -43,6 +44,7 @@ impl UserMangaListApi {
     /// If specified manga already exists, update its status.
     ///
     /// This endpoint updates only values specified by the parameter.
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put>
     pub fn put(&self) -> UserMangaListApiPut {
         UserMangaListApiPut {
@@ -81,6 +83,7 @@ impl UserMangaListApi {
 /// If specified manga already exists, update its status.
 ///
 /// This endpoint updates only values specified by the parameter.
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
@@ -210,6 +213,7 @@ impl UserMangaListApiDelete {
 }
 
 /// GET user manga list
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]

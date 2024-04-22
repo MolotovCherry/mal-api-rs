@@ -22,6 +22,7 @@ impl UserApi {
     }
 
     /// User get endpoints
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user>
     pub fn get(&self) -> UserApiGet {
         UserApiGet {
@@ -36,6 +37,7 @@ pub struct UserApiGet {
 
 impl UserApiGet {
     /// GET user information
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get>
     pub fn information(self) -> UserInformationGet {
         UserInformationGet {
@@ -46,6 +48,7 @@ impl UserApiGet {
 }
 
 /// GET user information
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]

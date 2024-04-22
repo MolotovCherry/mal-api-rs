@@ -32,6 +32,7 @@ static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
 /// A MyAnimeList Client.
 ///
 /// For proper usage of the api, please read the myanimelist docs:
+///
 /// <https://myanimelist.net/apiconfig/references/api/v2>
 #[derive(Debug, Clone)]
 pub struct MalClient {
@@ -78,36 +79,42 @@ impl MalClient {
     }
 
     /// The anime endpoint
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
     pub fn anime(&self) -> AnimeApi {
         AnimeApi::new(self.clone())
     }
 
     /// The manga endpoint
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/manga>
     pub fn manga(&self) -> MangaApi {
         MangaApi::new(self.clone())
     }
 
     /// The user-animelist endpoint
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user-animelist>
     pub fn user_animelist(&self) -> UserAnimeListApi {
         UserAnimeListApi::new(self.clone())
     }
 
     /// The user-mangalist endpoint
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user-mangalist>
     pub fn user_mangalist(&self) -> UserMangaListApi {
         UserMangaListApi::new(self.clone())
     }
 
     /// The user endpoint
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user>
     pub fn user(&self) -> UserApi {
         UserApi::new(self.clone())
     }
 
     /// The forum endpoint
+    ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/forum>
     pub fn forum(&self) -> ForumApi {
         ForumApi::new(self.clone())
