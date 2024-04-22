@@ -13,6 +13,12 @@ The api is fully async, but has a blocking api for those who need sync.
 
 Please report bugs if you encounter any.
 
+To get api client id and secret - which is required to use this - sign up for an app at https://myanimelist.net/apiconfig
+
+For help understanding this api and how it works, please carefully read mal api docs at https://myanimelist.net/apiconfig/references/api/v2
+
+Rate limiting is unspecified in mal api, but in practice you should do no more than 1 query/s
+
 ```rust
 // if you want to create your token with a scope, add scope before generating a token
 client.auth.add_scope("write:users");
