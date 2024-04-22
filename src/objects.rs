@@ -1,7 +1,6 @@
 use chrono::prelude::{DateTime, NaiveTime, Utc};
 use derive_more::Display as DeriveDisplay;
 use serde::{Deserialize, Deserializer, Serialize};
-use serde_with::skip_serializing_none;
 use strum::{Display, EnumString, IntoStaticStr};
 
 #[derive(Clone, Debug, Deserialize, DeriveDisplay, PartialEq)]
@@ -65,14 +64,12 @@ pub enum ReadStatus {
     PlanToRead,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct RankingList {
     pub data: Vec<MangaRankItem>,
     pub paging: Option<Paging>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct SeasonList {
     pub data: Vec<SingleAnimeItem>,
@@ -95,69 +92,59 @@ pub struct SingleMangaSerializationItem {
     pub node: MangaSerialization,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct MangaList {
     pub data: Vec<MangaItem>,
     pub paging: Option<Paging>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct AnimeList {
     pub data: Vec<AnimeItem>,
     pub paging: Option<Paging>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct AnimeSingleList {
     pub data: Vec<SingleAnimeItem>,
     pub paging: Option<Paging>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct MangaSingleList {
     pub data: Vec<SingleMangaItem>,
     pub paging: Option<Paging>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct Paging {
     pub previous: Option<String>,
     pub next: Option<String>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct MangaItem {
     pub node: MangaNode,
     pub list_status: Option<MangaListStatus>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct MangaRankItem {
     pub node: MangaNode,
     pub ranking: Rank,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct Rank {
     pub rank: u64,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct AnimeItem {
     pub node: AnimeNode,
     pub list_status: Option<AnimeListStatus>,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct MangaNode {
     pub id: u32,
@@ -205,7 +192,6 @@ pub struct Person {
     last_name: String,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct AnimeNode {
     pub id: u32,
@@ -381,7 +367,6 @@ pub struct MangaSerialization {
     pub name: String,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct Broadcast {
     pub day_of_the_week: DayOfWeek,
@@ -550,7 +535,6 @@ pub enum GenreType {
     Shounen,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct AlternativeTitles {
     pub synonyms: Option<Vec<String>>,
@@ -623,7 +607,6 @@ pub struct MangaListStatus {
 }
 
 // for parameter input on user animelist
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct AnimeListItem {
     pub status: WatchStatus,
@@ -641,7 +624,6 @@ pub struct AnimeListItem {
 }
 
 // for parameter input on user mangalist
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct MangaListItem {
     pub status: ReadStatus,
@@ -659,7 +641,6 @@ pub struct MangaListItem {
     pub start_date: PartialDate,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct User {
     pub id: u32,
@@ -674,7 +655,6 @@ pub struct User {
     pub anime_statistics: Option<AnimeStatistics>,
 }
 
-#[skip_serializing_none]
 #[derive(Copy, Clone, Deserialize, Debug, PartialEq)]
 pub struct AnimeStatistics {
     pub num_items_watching: u32,
@@ -826,7 +806,6 @@ pub struct ForumTopic {
     pub is_locked: bool,
 }
 
-#[skip_serializing_none]
 #[derive(Clone, Debug, PartialEq, Deserialize)]
 pub struct PartialDate {
     pub year: u16,
