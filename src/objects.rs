@@ -181,15 +181,15 @@ pub struct MangaNode {
 
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct Author {
-    node: Person,
-    role: String,
+    pub node: Person,
+    pub role: String,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq)]
 pub struct Person {
-    id: u32,
-    first_name: String,
-    last_name: String,
+    pub id: u32,
+    pub first_name: String,
+    pub last_name: String,
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq)]
