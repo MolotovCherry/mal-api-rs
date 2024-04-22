@@ -829,11 +829,7 @@ where
     let split = s.split('-').collect::<Vec<_>>();
 
     let date = PartialDate {
-        year: if num_hyphens >= 1 {
-            split[0].parse().unwrap()
-        } else {
-            s.parse().unwrap()
-        },
+        year: split[0].parse().unwrap(),
         month: if num_hyphens >= 1 {
             split[1].parse().ok()
         } else {
