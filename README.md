@@ -1,4 +1,4 @@
-# mal-api-rs
+# MyAnimeList Rust Api
 A fully typed Rust MyAnimeList api
 
 Currently this has full coverage of the following apis:
