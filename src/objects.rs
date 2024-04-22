@@ -432,23 +432,29 @@ pub enum GenreType {
     Action,
     Adventure,
     #[serde(rename = "Avant Garde")]
+    #[strum(serialize = "Avant Garde")]
     AvantGarde,
     #[serde(rename = "Award Winning")]
+    #[strum(serialize = "Award Winning")]
     AwardWinning,
     #[serde(rename = "Boys Love")]
+    #[strum(serialize = "Boys Love")]
     BoysLove,
     Comedy,
     Drama,
     Fantasy,
     #[serde(rename = "Girls Love")]
+    #[strum(serialize = "Girls Love")]
     GirlsLove,
     Gourmet,
     Horror,
     Mystery,
     Romance,
     #[serde(rename = "Sci-Fi")]
+    #[strum(serialize = "Sci-Fi")]
     SciFi,
     #[serde(rename = "Slice of Life")]
+    #[strum(serialize = "Slice of Life")]
     SliceOfLife,
     Sports,
     Supernatural,
@@ -459,35 +465,45 @@ pub enum GenreType {
     Hentai,
     // themes
     #[serde(rename = "Adult Cast")]
+    #[strum(serialize = "Adult Cast")]
     AdultCast,
     Anthropomorphic,
     CGDCT,
     #[serde(rename = "Combat Sports")]
+    #[strum(serialize = "Combat Sports")]
     CombatSports,
     Crossdressing,
     Delinquents,
     Detective,
     Educational,
     #[serde(rename = "Gag Humor")]
+    #[strum(serialize = "Gag Humor")]
     GagHumor,
     Gore,
     Harem,
     #[serde(rename = "High Stakes Game")]
+    #[strum(serialize = "High Stakes Game")]
     HighStakesGame,
     Historical,
     #[serde(rename = "Idols (Female)")]
+    #[strum(serialize = "Idols (Female)")]
     IdolsFemale,
     #[serde(rename = "Idols (Male)")]
+    #[strum(serialize = "Idols (Male)")]
     IdolsMale,
     Isekai,
     Iyashikei,
     #[serde(rename = "Love Polygon")]
+    #[strum(serialize = "Love Polygon")]
     LovePolygon,
     #[serde(rename = "Magical Sex Shift")]
+    #[strum(serialize = "Magical Sex Shift")]
     MagicalSexShift,
-    #[serde(rename = "MahouShoujo")]
+    #[serde(rename = "Mahou Shoujo")]
+    #[strum(serialize = "Mahou Shoujo")]
     MahouShoujo,
     #[serde(rename = "Martial Arts")]
+    #[strum(serialize = "Martial Arts")]
     MartialArts,
     Mecha,
     Medical,
@@ -495,36 +511,47 @@ pub enum GenreType {
     Music,
     Mythology,
     #[serde(rename = "Organized Crime")]
+    #[strum(serialize = "Organized Crime")]
     OrganizedCrime,
     #[serde(rename = "Otaku Culture")]
+    #[strum(serialize = "Otaku Culture")]
     OtakuCulture,
     Parody,
     #[serde(rename = "Performing Arts")]
+    #[strum(serialize = "Performing Arts")]
     PerformingArts,
     Psychological,
     Racing,
     Reincarnation,
     #[serde(rename = "Reverse Harem")]
+    #[strum(serialize = "Reverse Harem")]
     ReverseHarem,
     #[serde(rename = "Romantic Subtext")]
+    #[strum(serialize = "Romantic Subtext")]
     RomanticSubtext,
     Samurai,
     School,
     Showbiz,
     Space,
     #[serde(rename = "Strategy Game")]
+    #[strum(serialize = "Strategy Game")]
     StrategyGame,
     #[serde(rename = "Super Power")]
+    #[strum(serialize = "Super Power")]
     SuperPower,
     Survival,
     #[serde(rename = "Team Sports")]
+    #[strum(serialize = "Team Sports")]
     TeamSports,
     #[serde(rename = "Time Travel")]
+    #[strum(serialize = "Time Travel")]
     TimeTravel,
     Vampire,
     #[serde(rename = "Video Game")]
+    #[strum(serialize = "Video Game")]
     VideoGame,
     #[serde(rename = "Visual Arts")]
+    #[strum(serialize = "Visual Arts")]
     VisualArts,
     Workplace,
     // demographics
