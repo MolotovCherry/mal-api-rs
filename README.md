@@ -9,7 +9,7 @@ Currently this has full coverage of the following apis:
 - user
 - forum
 
-The api is fully async, but has a blocking api for those who need sync.
+The api is fully async, but has a blocking api for those who need sync (use the `*_blocking` function variants instead).
 
 Please report bugs if you encounter any.
 
