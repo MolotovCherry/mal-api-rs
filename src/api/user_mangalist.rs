@@ -32,8 +32,8 @@ impl UserMangaListApi {
         }
     }
 
-    pub fn patch(&self) -> UserMangaListApiPatch {
-        UserMangaListApiPatch {
+    pub fn put(&self) -> UserMangaListApiPut {
+        UserMangaListApiPut {
             client: self.client.clone(),
             manga_id: None,
             status: None,
@@ -59,7 +59,7 @@ impl UserMangaListApi {
 
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-pub struct UserMangaListApiPatch {
+pub struct UserMangaListApiPut {
     #[serde(skip)]
     client: MalClient,
     #[serde(skip)]
@@ -77,7 +77,7 @@ pub struct UserMangaListApiPatch {
     comments: Option<String>,
 }
 
-impl UserMangaListApiPatch {
+impl UserMangaListApiPut {
     pub fn manga_id(mut self, id: u64) -> Self {
         self.manga_id = Some(id);
         self
@@ -137,7 +137,7 @@ impl UserMangaListApiPatch {
         assert!(self.manga_id.is_some(), "manga_id is a required param");
 
         let url = USER_MANGA_ID.replace("{MANGA_ID}", &self.manga_id.unwrap().to_string());
-        self.client.http.patch(url, Some(&self), true).await
+        self.client.http.put(url, Some(&self), true).await
     }
 
     pub fn send_blocking(self) -> Result<(), ApiError> {

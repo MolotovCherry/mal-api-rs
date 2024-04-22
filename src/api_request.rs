@@ -11,7 +11,7 @@ use crate::Auth;
 #[derive(Copy, Clone, Debug)]
 pub enum RequestMethod {
     Get,
-    Patch,
+    Put,
     Delete,
 }
 
@@ -78,7 +78,7 @@ impl ApiRequest {
             .await
     }
 
-    pub async fn patch<D, P: Serialize>(
+    pub async fn put<D, P: Serialize>(
         &self,
         url: impl IntoUrl,
         data: Option<P>,
@@ -87,7 +87,7 @@ impl ApiRequest {
     where
         D: DeserializeOwned,
     {
-        self.api_request(url.into_url()?, RequestMethod::Patch, data, is_auth)
+        self.api_request(url.into_url()?, RequestMethod::Put, data, is_auth)
             .await
     }
 
@@ -106,10 +106,10 @@ impl ApiRequest {
         let mut request = match method {
             RequestMethod::Get => self.http.get(url.into_url()?),
             RequestMethod::Delete => self.http.delete(url.into_url()?),
-            RequestMethod::Patch => self.http.patch(url.into_url()?),
+            RequestMethod::Put => self.http.put(url.into_url()?),
         };
 
-        if matches!(method, RequestMethod::Patch) {
+        if matches!(method, RequestMethod::Put) {
             if let Some(data) = &data {
                 request = request.form(data);
             }

@@ -32,8 +32,8 @@ impl UserAnimeListApi {
         }
     }
 
-    pub fn patch(&self) -> UserAnimeListApiPatch {
-        UserAnimeListApiPatch {
+    pub fn put(&self) -> UserAnimeListApiPut {
+        UserAnimeListApiPut {
             client: self.client.clone(),
             anime_id: None,
             status: None,
@@ -58,7 +58,7 @@ impl UserAnimeListApi {
 
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-pub struct UserAnimeListApiPatch {
+pub struct UserAnimeListApiPut {
     #[serde(skip)]
     client: MalClient,
     #[serde(skip)]
@@ -75,7 +75,7 @@ pub struct UserAnimeListApiPatch {
     comments: Option<String>,
 }
 
-impl UserAnimeListApiPatch {
+impl UserAnimeListApiPut {
     pub fn anime_id(mut self, id: u64) -> Self {
         self.anime_id = Some(id);
         self
@@ -130,7 +130,7 @@ impl UserAnimeListApiPatch {
         assert!(self.anime_id.is_some(), "anime_id is a required param");
 
         let url = USER_ANIME_ID.replace("{ANIME_ID}", &self.anime_id.unwrap().to_string());
-        self.client.http.patch(url, Some(&self), true).await
+        self.client.http.put(url, Some(&self), true).await
     }
 
     pub fn send_blocking(self) -> Result<(), ApiError> {
