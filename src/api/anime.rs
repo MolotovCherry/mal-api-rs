@@ -58,6 +58,7 @@ impl AnimeApiGet {
             limit: None,
             offset: None,
             fields: None,
+            nsfw: None,
         }
     }
 
@@ -82,6 +83,7 @@ impl AnimeApiGet {
             limit: None,
             offset: None,
             fields: None,
+            nsfw: None,
         }
     }
 
@@ -97,6 +99,7 @@ impl AnimeApiGet {
             limit: None,
             offset: None,
             fields: None,
+            nsfw: None,
         }
     }
 
@@ -109,6 +112,7 @@ impl AnimeApiGet {
             limit: None,
             offset: None,
             fields: None,
+            nsfw: None,
         }
     }
 }
@@ -126,6 +130,7 @@ pub struct AnimeListGet {
     limit: Option<u32>,
     offset: Option<u32>,
     fields: Option<String>,
+    nsfw: Option<bool>,
 }
 
 impl AnimeListGet {
@@ -152,6 +157,12 @@ impl AnimeListGet {
         let fields = fields.into_iter().map(|f| f.as_ref().to_string()).join(",");
 
         self.fields = Some(fields);
+        self
+    }
+
+    /// Whether to return nsfw material.
+    pub fn nsfw(mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
         self
     }
 
@@ -228,6 +239,7 @@ pub struct AnimeRankingGet {
     limit: Option<u16>,
     offset: Option<u64>,
     fields: Option<String>,
+    nsfw: Option<bool>,
 }
 
 impl AnimeRankingGet {
@@ -254,6 +266,12 @@ impl AnimeRankingGet {
         let fields = fields.into_iter().map(|f| f.as_ref().to_string()).join(",");
 
         self.fields = Some(fields);
+        self
+    }
+
+    /// Whether to return nsfw material.
+    pub fn nsfw(mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
         self
     }
 
@@ -293,6 +311,7 @@ pub struct AnimeSeasonalGet {
     limit: Option<u16>,
     offset: Option<u64>,
     fields: Option<String>,
+    nsfw: Option<bool>,
 }
 
 impl AnimeSeasonalGet {
@@ -333,6 +352,12 @@ impl AnimeSeasonalGet {
         self
     }
 
+    /// Whether to return nsfw material.
+    pub fn nsfw(mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
+        self
+    }
+
     /// Send the request.
     pub async fn send(self) -> Result<SeasonList, ApiError> {
         assert!(self.year.is_some(), "year is a required param");
@@ -367,6 +392,7 @@ pub struct AnimeSuggestedGet {
     limit: Option<u16>,
     offset: Option<u64>,
     fields: Option<String>,
+    nsfw: Option<bool>,
 }
 
 impl AnimeSuggestedGet {
@@ -387,6 +413,12 @@ impl AnimeSuggestedGet {
         let fields = fields.into_iter().map(|f| f.as_ref().to_string()).join(",");
 
         self.fields = Some(fields);
+        self
+    }
+
+    /// Whether to return nsfw material.
+    pub fn nsfw(mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
         self
     }
 
