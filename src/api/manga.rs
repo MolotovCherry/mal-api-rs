@@ -74,7 +74,6 @@ impl MangaApiGet {
             limit: None,
             offset: None,
             fields: None,
-            nsfw: None,
         }
     }
 }
@@ -200,7 +199,6 @@ pub struct MangaApiGetRanking {
     limit: Option<u16>,
     offset: Option<u64>,
     fields: Option<String>,
-    nsfw: Option<bool>,
 }
 
 impl MangaApiGetRanking {
@@ -227,12 +225,6 @@ impl MangaApiGetRanking {
         let fields = fields.into_iter().map(|f| f.as_ref().to_string()).join(",");
 
         self.fields = Some(fields);
-        self
-    }
-
-    /// Whether to return nsfw material.
-    pub fn nsfw(mut self, nsfw: bool) -> Self {
-        self.nsfw = Some(nsfw);
         self
     }
 
