@@ -99,22 +99,22 @@ impl fmt::Debug for Auth {
 
 impl Auth {
     pub fn new(
-        client_id: &str,
-        client_secret: &str,
-        redirect_uri: &str,
+        client_id: ClientId,
+        client_secret: ClientSecret,
+        redirect_uri: RedirectUrl,
     ) -> Result<Self, TokenError> {
         let client = BasicClient::new(
-            ClientId::new(client_id.to_owned()),
-            Some(ClientSecret::new(client_secret.to_owned())),
+            client_id.clone(),
+            Some(client_secret.clone()),
             AuthUrl::new(AUTH_URL.to_owned()).unwrap(),
             Some(TokenUrl::new(TOKEN_URL.to_owned()).unwrap()),
         )
-        .set_redirect_uri(RedirectUrl::new(redirect_uri.to_owned())?);
+        .set_redirect_uri(redirect_uri);
 
         let slf = Self {
             client,
-            client_id: ClientId::new(client_id.to_owned()),
-            client_secret: ClientSecret::new(client_secret.to_owned()),
+            client_id,
+            client_secret,
             access_token: Mutex::new(None),
             refresh_token: Mutex::new(None),
             expires_at: Mutex::new(None),
@@ -154,9 +154,9 @@ impl Auth {
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct refresh token expiry time as well.
-    pub fn set_refresh_token_unchecked(&self, token: Option<&str>) {
+    pub fn set_refresh_token_unchecked(&self, token: Option<RefreshToken>) {
         let mut lock = self.refresh_token.lock().unwrap();
-        *lock = token.map(|t| RefreshToken::new(t.to_owned()));
+        *lock = token;
     }
 
     /// Manually set the access token. This is handled automatically by [`Self::refresh()`], [`Self::refresh_blocking()`], [`Self::regenerate()`], and [`Self::regenerate_blocking()`].
@@ -164,9 +164,9 @@ impl Auth {
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct access token expiry time as well.
-    pub fn set_access_token_unchecked(&self, token: &str) {
+    pub fn set_access_token_unchecked(&self, token: AccessToken) {
         let mut lock = self.access_token.lock().unwrap();
-        *lock = Some(AccessToken::new(token.to_owned()));
+        *lock = Some(token);
     }
 
     /// Updates the access token expiry time. Duration is how long after NOW it will after in.

@@ -6,7 +6,9 @@ mod utils;
 
 use std::sync::Arc;
 
-pub use oauth2::{AccessToken, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RefreshToken};
+pub use oauth2::{
+    AccessToken, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RedirectUrl, RefreshToken,
+};
 use reqwest::{Client, ClientBuilder};
 use tokio::runtime::{Builder, Runtime};
 
@@ -46,9 +48,9 @@ pub struct MalClient {
 impl MalClient {
     /// Create a client with default useragent CARGO_PKG_NAME/CARGO_PKG_VERSION
     pub fn new(
-        client_id: &str,
-        client_secret: &str,
-        redirect_uri: &str,
+        client_id: ClientId,
+        client_secret: ClientSecret,
+        redirect_uri: RedirectUrl,
     ) -> Result<Self, MalClientError> {
         Self::new_with(client_id, client_secret, redirect_uri, |builder| {
             builder
@@ -63,9 +65,9 @@ impl MalClient {
 
     /// Create client with custom reqwest settings (user agent for example)
     pub fn new_with(
-        client_id: &str,
-        client_secret: &str,
-        redirect_uri: &str,
+        client_id: ClientId,
+        client_secret: ClientSecret,
+        redirect_uri: RedirectUrl,
         builder_cb: impl Fn(ClientBuilder) -> Result<Client, reqwest::Error>,
     ) -> Result<Self, MalClientError> {
         let builder = reqwest::Client::builder();
