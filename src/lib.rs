@@ -6,6 +6,7 @@ mod utils;
 
 use std::sync::Arc;
 
+pub use oauth2::{AccessToken, ClientId, ClientSecret, RefreshToken};
 use reqwest::{Client, ClientBuilder};
 use tokio::runtime::{Builder, Runtime};
 

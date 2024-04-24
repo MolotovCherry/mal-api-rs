@@ -102,7 +102,7 @@ impl fmt::Debug for Auth {
 }
 
 impl Auth {
-    pub(crate) fn new(
+    pub fn new(
         client_id: &str,
         client_secret: &str,
         redirect_uri: &str,
