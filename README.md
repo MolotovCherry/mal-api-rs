@@ -22,7 +22,7 @@ Rate limiting is unspecified in mal api, but in practice you should do no more t
 ```rust
 // if you want to create your token with a scope, add scope before generating a token
 // mal should add this by default, so I don't think adding this manually is needed
-client.auth.add_scope("write:users");
+client.auth.add_scope(Scope::new("write:users"));
 
 // this requires a webserver to receive the oauth code+state for regenerate
 // set your own custom callback for production usage
@@ -48,8 +48,8 @@ client.auth.refresh_token().await;
 client.auth.try_refresh().await;
 
 // you can also set the access/refresh token manually if you need to
-client.auth.set_refresh_token(Some("token"));
-client.auth.set_access_token(Some("token"));
+client.auth.set_refresh_token(Some(RefreshToken::new("token")));
+client.auth.set_access_token(Some(AccessToken::new("token")));
 // set the time from Instant::now() after which access token expires
 client.auth.set_expires_in(Some(Duration::from_secs(3600)));
 client.auth.set_refresh_expires_in(Some(Duration::from_secs(3600)));

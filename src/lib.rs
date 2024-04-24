@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 pub use oauth2::{
     AccessToken, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RedirectUrl, RefreshToken,
+    Scope,
 };
 use reqwest::{Client, ClientBuilder};
 use tokio::runtime::{Builder, Runtime};

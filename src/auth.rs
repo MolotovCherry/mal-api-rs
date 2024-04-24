@@ -192,9 +192,9 @@ impl Auth {
     }
 
     /// Add an oauth2 scope. Use this before you generate a new token.
-    pub fn add_scope(&self, scope: &str) {
+    pub fn add_scope(&self, scope: Scope) {
         let mut lock = self.scopes.lock().unwrap();
-        lock.push(Scope::new(scope.to_owned()));
+        lock.push(scope);
     }
 
     /// Set the callback used when running [`Self::regenerate()`].
