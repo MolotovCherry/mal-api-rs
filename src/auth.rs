@@ -39,19 +39,15 @@ pub enum AuthError {
     RefreshTokenExpiredError,
 }
 
-#[derive(Debug, Clone)]
-pub struct Code(pub String);
-#[derive(Debug, Clone)]
-pub struct State(pub String);
-
 type Callback = Box<
     dyn Fn(
             reqwest::Url,
-            State,
+            CsrfToken,
         ) -> Pin<
             Box<
-                dyn Future<Output = Result<(Code, State), Box<dyn std::error::Error>>>
-                    + Send
+                dyn Future<
+                        Output = Result<(AuthorizationCode, CsrfToken), Box<dyn std::error::Error>>,
+                    > + Send
                     + 'static,
             >,
         > + Send
@@ -208,8 +204,10 @@ impl Auth {
     /// You may return success from this function ONLY if the state is correct.
     /// You may want to make this timeout so [`Self::regenerate()`] doesn't block forever.
     pub async fn set_callback<
-        F: Fn(reqwest::Url, State) -> Fut + Send + 'static,
-        Fut: Future<Output = Result<(Code, State), Box<dyn std::error::Error>>> + 'static + Send,
+        F: Fn(reqwest::Url, CsrfToken) -> Fut + Send + 'static,
+        Fut: Future<Output = Result<(AuthorizationCode, CsrfToken), Box<dyn std::error::Error>>>
+            + 'static
+            + Send,
     >(
         &self,
         f: F,
@@ -225,8 +223,10 @@ impl Auth {
     /// You may return success from this function ONLY if the state is correct.
     /// You may want to make this timeout so [`Self::regenerate()`] doesn't block forever.
     pub fn set_callback_blocking<
-        F: Fn(reqwest::Url, State) -> Fut + Send + 'static,
-        Fut: Future<Output = Result<(Code, State), Box<dyn std::error::Error>>> + 'static + Send,
+        F: Fn(reqwest::Url, CsrfToken) -> Fut + Send + 'static,
+        Fut: Future<Output = Result<(AuthorizationCode, CsrfToken), Box<dyn std::error::Error>>>
+            + 'static
+            + Send,
     >(
         &self,
         f: F,
@@ -372,23 +372,23 @@ impl Auth {
 
         // the state that gets passed into the callback is the only one that is valid to return
         // the code back to the caller. make sure they match, or regenerate() will return an error
-        let (res_code, res_state) = {
+        let (auth_code, client_state) = {
             let callback = self.callback.lock().await;
-            match callback(auth_url, State(state.secret().clone())).await {
+            match callback(auth_url, state.clone()).await {
                 Ok(v) => v,
                 Err(e) => return Err(TokenError::Callback(e.to_string())),
             }
         };
 
         // ensure state is correct
-        if state.secret() != &res_state.0 {
+        if state.secret() != client_state.secret() {
             return Err(TokenError::StateMismatch);
         }
 
         // now get access token
         let Ok(token) = self
             .client
-            .exchange_code(AuthorizationCode::new(res_code.0))
+            .exchange_code(auth_code)
             .set_pkce_verifier(pkce_verifier)
             .request_async(async_http_client)
             .await

@@ -21,6 +21,7 @@ Rate limiting is unspecified in mal api, but in practice you should do no more t
 
 ```rust
 // if you want to create your token with a scope, add scope before generating a token
+// mal should add this by default, so I don't think adding this manually is needed
 client.auth.add_scope("write:users");
 
 // this requires a webserver to receive the oauth code+state for regenerate
@@ -33,7 +34,7 @@ client.auth.set_callback(|url, state| async {
     // regenerate api will fail due to security check
 
     // get the code / state and return it
-    (Code("".to_owned()), State("".to_owned()))
+    (AuthorizationCode::new("".to_owned()), CsrfToken::new("".to_owned()))
 });
 
 // regenerate tokens from scratch
