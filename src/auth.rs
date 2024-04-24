@@ -102,7 +102,7 @@ impl Auth {
         client_id: ClientId,
         client_secret: ClientSecret,
         redirect_uri: RedirectUrl,
-    ) -> Result<Self, TokenError> {
+    ) -> Self {
         let client = BasicClient::new(
             client_id.clone(),
             Some(client_secret.clone()),
@@ -111,7 +111,7 @@ impl Auth {
         )
         .set_redirect_uri(redirect_uri);
 
-        let slf = Self {
+        Self {
             client,
             client_id,
             client_secret,
@@ -124,9 +124,7 @@ impl Auth {
             callback: tokio::sync::Mutex::new(Box::new(|_, _| {
                 unimplemented!("oauth2 callback not implemented")
             })),
-        };
-
-        Ok(slf)
+        }
     }
 
     /// Get the client id.

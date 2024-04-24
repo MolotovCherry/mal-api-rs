@@ -74,7 +74,7 @@ impl MalClient {
         let builder = reqwest::Client::builder();
         let http = builder_cb(builder)?;
 
-        let auth = Arc::new(Auth::new(client_id, client_secret, redirect_uri)?);
+        let auth = Arc::new(Auth::new(client_id, client_secret, redirect_uri));
         let http = ApiRequest::new(auth.clone(), http);
 
         let slf = Self { auth, http };
