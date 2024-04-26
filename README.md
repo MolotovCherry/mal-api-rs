@@ -20,6 +20,8 @@ For help understanding this api and how it works, please carefully read mal api 
 Rate limiting is unspecified in mal api, but in practice you should do no more than 1 query/s
 
 ```rust
+let client = ClientBuilder::new().client_id("your-id").client_secret("secret").redirect_url("your-url").build().unwrap();
+
 // if you want to create your token with a scope, add scope before generating a token
 // mal should add this by default, so I don't think adding this manually is needed
 client.auth.add_scope(Scope::new("write:users"));
@@ -48,11 +50,11 @@ client.auth.refresh_token().await;
 client.auth.try_refresh().await;
 
 // you can also set the access/refresh token manually if you need to
-client.auth.set_refresh_token(Some(RefreshToken::new("token")));
-client.auth.set_access_token(Some(AccessToken::new("token")));
+client.auth.set_refresh_token(RefreshToken::new("token"));
+client.auth.set_access_token(AccessToken::new("token"));
 // set the time from Instant::now() after which access token expires
-client.auth.set_expires_in(Some(Duration::from_secs(3600)));
-client.auth.set_refresh_expires_in(Some(Duration::from_secs(3600)));
+client.auth.set_expires_in(Duration::from_secs(3600));
+client.auth.set_refresh_expires_in(Duration::from_secs(3600));
 
 // use the api
 client.anime().get().list().query("foo").send().await;
@@ -66,3 +68,5 @@ client.anime().get().list().query("foo").send().await;
 // view mal docs to see if your token needs a scope or not,
 // and for information on what the routes do
 ```
+
+Warning: This crate may change api between versions before 1.0 as the api is fleshed out.
