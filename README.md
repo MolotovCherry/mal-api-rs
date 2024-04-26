@@ -11,8 +11,6 @@ Currently this has full coverage of the following apis:
 
 The api is fully async, but has a blocking api for those who need sync (use the `*_blocking` function variants instead).
 
-Please report bugs if you encounter any.
-
 To get api client id and secret - which is required to use this - sign up for an app at https://myanimelist.net/apiconfig
 
 For help understanding this api and how it works, please carefully read mal api docs at https://myanimelist.net/apiconfig/references/api/v2
@@ -70,3 +68,5 @@ client.anime().get().list().query("foo").send().await;
 ```
 
 Warning: This crate may change api between versions before 1.0 as the api is fleshed out.
+
+If you see any bugs, please report them. Mostly these may be instances "null" appears in the api but was assumed to always exist in the deserialized types. While this was quickly tested with a bit of data to hopefully get a complete picture, this is not guaranteed to be always correct. Other than that, it should be feature complete and working.
