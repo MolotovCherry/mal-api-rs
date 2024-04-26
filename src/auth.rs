@@ -78,8 +78,8 @@ impl AuthTokens {
 
         auth.set_access_token_unchecked(self.access_token);
         auth.set_refresh_token_unchecked(self.refresh_token);
-        *auth.expires_at.lock().unwrap() = self.expires_at;
-        *auth.refresh_expires_at.lock().unwrap() = self.refresh_expires_at;
+        auth.set_expires_at_unchecked(self.expires_at);
+        auth.set_refresh_expires_at_unchecked(self.refresh_expires_at);
 
         auth
     }
