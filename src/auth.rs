@@ -384,17 +384,18 @@ impl Auth {
             .await
             .map_err(|e| TokenError::OAuth2(e.to_string()))?;
 
-        let mut lock = self.access_token.lock().unwrap();
-        *lock = token.access_token().clone();
+        self.set_expires_at_unchecked(
+            Utc::now().timestamp() as u64 + token.expires_in().unwrap().as_secs(),
+        );
 
-        let mut lock = self.refresh_token.lock().unwrap();
-        *lock = token.refresh_token().unwrap().clone();
+        // how many days the refresh token is valid for; docs say "1 month"
+        self.set_refresh_expires_at_unchecked(
+            Utc::now().timestamp() as u64 + (Self::DAYS * 24 * 60 * 60),
+        );
 
-        let mut lock = self.expires_at.lock().unwrap();
-        *lock = (Utc::now().timestamp() as u64) + token.expires_in().unwrap().as_secs();
+        self.set_access_token_unchecked(token.access_token().clone());
 
-        let mut lock = self.refresh_expires_at.lock().unwrap();
-        *lock = Utc::now().timestamp() as u64 + (Self::DAYS * 24 * 60 * 60);
+        self.set_refresh_token_unchecked(token.refresh_token().unwrap().clone());
 
         Ok(())
     }
@@ -449,18 +450,18 @@ impl Auth {
             return Err(TokenError::Access);
         };
 
-        let mut expires_at = self.expires_at.lock().unwrap();
-        *expires_at = Utc::now().timestamp() as u64 + token.expires_in().unwrap().as_secs();
+        self.set_expires_at_unchecked(
+            Utc::now().timestamp() as u64 + token.expires_in().unwrap().as_secs(),
+        );
 
         // how many days the refresh token is valid for; docs say "1 month"
-        let mut refresh_expires_at = self.refresh_expires_at.lock().unwrap();
-        *refresh_expires_at = Utc::now().timestamp() as u64 + (Self::DAYS * 24 * 60 * 60);
+        self.set_refresh_expires_at_unchecked(
+            Utc::now().timestamp() as u64 + (Self::DAYS * 24 * 60 * 60),
+        );
 
-        let mut access_token = self.access_token.lock().unwrap();
-        *access_token = token.access_token().clone();
+        self.set_access_token_unchecked(token.access_token().clone());
 
-        let mut refresh_token = self.refresh_token.lock().unwrap();
-        *refresh_token = token.refresh_token().unwrap().clone();
+        self.set_refresh_token_unchecked(token.refresh_token().unwrap().clone());
 
         Ok(())
     }
