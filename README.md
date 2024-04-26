@@ -48,11 +48,11 @@ client.auth.refresh_token().await;
 client.auth.try_refresh().await;
 
 // you can also set the access/refresh token manually if you need to
-client.auth.set_refresh_token(RefreshToken::new("token"));
-client.auth.set_access_token(AccessToken::new("token"));
+client.auth.set_refresh_token_unchecked(RefreshToken::new("token"));
+client.auth.set_access_token_unchecked(AccessToken::new("token"));
 // set the time from Instant::now() after which access token expires
-client.auth.set_expires_in(Duration::from_secs(3600));
-client.auth.set_refresh_expires_in(Duration::from_secs(3600));
+client.auth.set_expires_in_unchecked(Duration::from_secs(3600));
+client.auth.set_refresh_expires_in_unchecked(Duration::from_secs(3600));
 
 // use the api
 client.anime().get().list().query("foo").send().await;
