@@ -196,7 +196,7 @@ impl Auth {
     }
 
     /// Set the callback used when running [`Self::regenerate()`].
-    /// This passes in a [`State`] representing the client state this callback is looking for.
+    /// This passes in a [`CsrfToken`] representing the client state this callback is looking for.
     /// You can know which client request is the correct client because the states match each other.
     ///
     /// You may return success from this function ONLY if the state is correct.
@@ -215,7 +215,7 @@ impl Auth {
     }
 
     /// Set the callback used when running [`Self::regenerate()`].
-    /// This passes in a [`State`] representing the client state this callback is looking for.
+    /// This passes in a [`CsrfToken`] representing the client state this callback is looking for.
     /// You can know which client request is the correct client because the states match each other.
     ///
     /// You may return success from this function ONLY if the state is correct.
