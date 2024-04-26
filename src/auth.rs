@@ -68,6 +68,22 @@ pub struct AuthTokens {
 }
 
 impl AuthTokens {
+    pub fn to_auth(
+        &self,
+        client_id: ClientId,
+        client_secret: ClientSecret,
+        redirect_url: RedirectUrl,
+    ) -> Auth {
+        let auth = Auth::new(client_id, client_secret, redirect_url);
+
+        auth.set_access_token_unchecked(self.access_token.clone());
+        auth.set_refresh_token_unchecked(self.refresh_token.clone());
+        auth.set_expires_at_unchecked(self.expires_at);
+        auth.set_refresh_expires_at_unchecked(self.refresh_expires_at);
+
+        auth
+    }
+
     pub fn into_auth(
         self,
         client_id: ClientId,
