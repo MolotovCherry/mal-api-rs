@@ -106,39 +106,41 @@ impl MalClientBuilder {
         Self::default()
     }
 
-    /// Use your own [Auth] value
-    /// If [Auth] is not provided, you must set client_id, client_secret, and redirect_url
+    /// Use your own [Auth] value.
+    ///
+    /// If [Auth] is not provided, you must set client_id, client_secret, and redirect_url.
     pub fn auth(mut self, auth: Auth) -> Self {
         self.auth = Some(Arc::new(auth));
         self
     }
 
-    /// Use a shared [Auth] value you have
-    /// If [Auth] is not provided, you must set client_id, client_secret, and redirect_url
+    /// Use a shared [Auth] value you have.
+    ///
+    /// If [Auth] is not provided, you must set client_id, client_secret, and redirect_url.
     pub fn auth_shared(mut self, auth: Arc<Auth>) -> Self {
         self.auth = Some(auth);
         self
     }
 
-    /// The client id used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder
+    /// The client id used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder.
     pub fn client_id(mut self, client_id: ClientId) -> Self {
         self.client_id = Some(client_id);
         self
     }
 
-    /// The client secret used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder
+    /// The client secret used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder.
     pub fn client_secret(mut self, client_secret: ClientSecret) -> Self {
         self.client_secret = Some(client_secret);
         self
     }
 
-    /// The redirect_url used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder
+    /// The redirect_url used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder.
     pub fn redirect_url(mut self, redirect_url: RedirectUrl) -> Self {
         self.redirect_url = Some(redirect_url);
         self
     }
 
-    /// Customize the reqwest client (e.g. change the useragent)
+    /// Customize the reqwest client (e.g. change the useragent).
     pub fn http_builder(
         mut self,
         cb: impl FnOnce(ClientBuilder) -> Result<Client, reqwest::Error> + 'static,
