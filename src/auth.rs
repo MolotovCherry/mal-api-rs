@@ -161,8 +161,6 @@ impl Auth {
     /// Return client tokens to save user creds that can be serialized/deserialized.
     /// serializes access/refresh tokens, and their expiry
     /// Does not serialize client_id, client_secret, scopes, or callback
-    ///
-    /// Will return none if access/refresh tokens or one of their expiry dates is not yet set
     pub fn to_tokens(&self) -> AuthTokens {
         let at = self.access_token();
         let rt = self.refresh_token();
