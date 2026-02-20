@@ -469,6 +469,7 @@ pub enum GenreType {
     AdultCast,
     Anthropomorphic,
     CGDCT,
+    Childcare,
     #[serde(rename = "Combat Sports")]
     #[strum(serialize = "Combat Sports")]
     CombatSports,
@@ -496,6 +497,9 @@ pub enum GenreType {
     #[serde(rename = "Love Polygon")]
     #[strum(serialize = "Love Polygon")]
     LovePolygon,
+    #[serde(rename = "Love Status Quo")]
+    #[strum(serialize = "Love Status Quo")]
+    LoveStatusQuo,
     #[serde(rename = "Magical Sex Shift")]
     #[strum(serialize = "Magical Sex Shift")]
     MagicalSexShift,
@@ -520,6 +524,7 @@ pub enum GenreType {
     #[serde(rename = "Performing Arts")]
     #[strum(serialize = "Performing Arts")]
     PerformingArts,
+    Pets,
     Psychological,
     Racing,
     Reincarnation,
@@ -546,10 +551,14 @@ pub enum GenreType {
     #[serde(rename = "Time Travel")]
     #[strum(serialize = "Time Travel")]
     TimeTravel,
+    #[serde(rename = "Urban Fantasy")]
+    #[strum(serialize = "Urban Fantasy")]
+    UrbanFantasy,
     Vampire,
     #[serde(rename = "Video Game")]
     #[strum(serialize = "Video Game")]
     VideoGame,
+    Villainess,
     #[serde(rename = "Visual Arts")]
     #[strum(serialize = "Visual Arts")]
     VisualArts,
