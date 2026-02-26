@@ -205,7 +205,7 @@ impl Auth {
         self.refresh_token.clone()
     }
 
-    /// Manually set the refresh token. This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
+    /// Manually set the refresh token. This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_finish_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -214,7 +214,7 @@ impl Auth {
         self.refresh_token = token;
     }
 
-    /// Manually set the access token. This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
+    /// Manually set the access token. This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_finish_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -224,7 +224,7 @@ impl Auth {
     }
 
     /// Updates the access token expiry time. Expiry is utc seconds
-    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_finish_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -234,7 +234,7 @@ impl Auth {
     }
 
     /// Updates the access token expiry time. Duration is how long from NOW it will after in.
-    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_finish_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -244,7 +244,7 @@ impl Auth {
     }
 
     /// Updates the refresh token expiry time. Duration is how long from NOW it will after in.
-    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_finish_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
@@ -254,7 +254,7 @@ impl Auth {
     }
 
     /// Updates the refresh token expiry time. Expiry is utc seconds
-    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_finish_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
