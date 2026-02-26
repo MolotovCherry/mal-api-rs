@@ -117,27 +117,25 @@ impl MalClientBuilder {
         Self::default()
     }
 
-    /// Use your own [Auth] value.
-    ///
-    /// If [Auth] is not provided, you must set client_id, client_secret, and redirect_url.
+    /// Provide [AuthTokens] for the client.
     pub fn auth_tokens(mut self, auth: AuthTokens) -> Self {
         self.auth_tokens = Some(auth);
         self
     }
 
-    /// The client id used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder.
+    /// Your myanimelist client id.
     pub fn client_id(mut self, client_id: ClientId) -> Self {
         self.client_id = Some(client_id);
         self
     }
 
-    /// Provide a reqwest client.
+    /// Provide a reqwest client. If specified, [MalClientBuilder::http_builder] takes precedence over this one. If both are empty, one will be automatically created.
     pub fn http(mut self, client: Client) -> Self {
         self.client = Some(client);
         self
     }
 
-    /// Customize a reqwest client (e.g. change the useragent).
+    /// Customize a reqwest client (e.g. change the useragent). If empty, uses [MalClientBuilder::http], or if both empty, one is automatically created.
     pub fn http_builder(
         mut self,
         cb: impl FnOnce(ClientBuilder) -> Result<Client, reqwest::Error> + 'static,
