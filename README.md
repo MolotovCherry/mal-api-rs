@@ -11,7 +11,7 @@ Currently this has full coverage of the following apis:
 - user
 - forum
 
-The api is fully async, but has a blocking api under the `blocking` feature for those who need sync (use the `*_blocking` function variants instead). 
+The api is fully async, but has a blocking api for those who need sync (use the `*_blocking` function variants instead).
 
 To get api client id and secret - which is required to use this - sign up for an app at https://myanimelist.net/apiconfig
 
@@ -80,6 +80,10 @@ client.anime().get().list().query("foo").send().await;
 // view mal docs to see if your token needs a scope or not,
 // and for information on what the routes do
 ```
+
+# Features
+
+- blocking - Enable blocking api.
 
 Warning: This crate may change api between versions before 1.0 as the api is fleshed out.
 
