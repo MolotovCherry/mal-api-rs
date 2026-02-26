@@ -5,10 +5,10 @@ use strum::{Display, EnumString, IntoStaticStr};
 
 #[derive(Clone, Debug, Serialize, Deserialize, DeriveDisplay, PartialEq)]
 pub enum Username {
-    #[display(fmt = "@me")]
+    #[display("@me")]
     #[serde(rename = "@me")]
     Me,
-    #[display(fmt = "{}", _0)]
+    #[display("{}", _0)]
     User(String),
 }
 
