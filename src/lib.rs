@@ -118,8 +118,15 @@ impl MalClientBuilder {
     }
 
     /// Provide [AuthTokens] for the client.
-    pub fn auth_tokens(mut self, auth: AuthTokens) -> Self {
-        self.auth_tokens = Some(auth);
+    ///
+    /// ```rust
+    /// let auth: Auth = /*value*/;
+    /// MalClientBuilder::new().auth_tokens(&auth);
+    /// MalClientBuilder::new().auth_tokens(auth);
+    /// MalClientBuilder::new().auth_tokens(auth.to_tokens());
+    /// ```
+    pub fn auth_tokens(mut self, auth: impl Into<AuthTokens>) -> Self {
+        self.auth_tokens = Some(auth.into());
         self
     }
 

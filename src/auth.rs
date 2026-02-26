@@ -63,36 +63,36 @@ impl Default for AuthTokens {
 }
 
 impl AuthTokens {
+    #[deprecated(since = "0.2.0", note = "use Auth::from_auth_tokens()")]
     pub fn to_auth(
         &self,
         client_id: ClientId,
         client_secret: ClientSecret,
         redirect_url: RedirectUrl,
     ) -> Auth {
-        let mut auth = Auth::new(client_id, client_secret, redirect_url);
-
-        auth.set_access_token_unchecked(self.access_token.clone());
-        auth.set_refresh_token_unchecked(self.refresh_token.clone());
-        auth.set_expires_at_unchecked(self.expires_at);
-        auth.set_refresh_expires_at_unchecked(self.refresh_expires_at);
-
-        auth
+        Auth::from_auth_tokens(self.clone(), client_id, client_secret, redirect_url)
     }
 
+    #[deprecated(since = "0.2.0", note = "use Auth::from_auth_tokens()")]
     pub fn into_auth(
         self,
         client_id: ClientId,
         client_secret: ClientSecret,
         redirect_url: RedirectUrl,
     ) -> Auth {
-        let mut auth = Auth::new(client_id, client_secret, redirect_url);
+        Auth::from_auth_tokens(self, client_id, client_secret, redirect_url)
+    }
+}
 
-        auth.set_access_token_unchecked(self.access_token);
-        auth.set_refresh_token_unchecked(self.refresh_token);
-        auth.set_expires_at_unchecked(self.expires_at);
-        auth.set_refresh_expires_at_unchecked(self.refresh_expires_at);
+impl From<Auth> for AuthTokens {
+    fn from(value: Auth) -> Self {
+        value.to_tokens()
+    }
+}
 
-        auth
+impl From<&Auth> for AuthTokens {
+    fn from(value: &Auth) -> Self {
+        value.to_tokens()
     }
 }
 
@@ -167,6 +167,22 @@ impl Auth {
             pkce_code_verifier: None,
             client_req: None,
         }
+    }
+
+    pub fn from_auth_tokens(
+        tokens: AuthTokens,
+        client_id: ClientId,
+        client_secret: ClientSecret,
+        redirect_url: RedirectUrl,
+    ) -> Auth {
+        let mut auth = Auth::new(client_id, client_secret, redirect_url);
+
+        auth.set_access_token_unchecked(tokens.access_token);
+        auth.set_refresh_token_unchecked(tokens.refresh_token);
+        auth.set_expires_at_unchecked(tokens.expires_at);
+        auth.set_refresh_expires_at_unchecked(tokens.refresh_expires_at);
+
+        auth
     }
 
     /// Return client tokens to save user creds that can be serialized/deserialized.
@@ -396,14 +412,13 @@ impl Auth {
 
     /// So, a client has now authorized themselves, visited the redirect url on your server, and
     /// you've verified the state you received in the url matches up to this [`ClientAuthRequest`].
-    /// Please pass in the corresponding [`ClientAuthRequest`], along with the state and authorization code
-    /// you received in the redirect url.
+    /// Please pass in the client's state and authorization code you received in the redirect url.
     ///
-    /// Note: Is it valid to call this method with a request and state that do not match.
+    /// Note: Is it valid to call this method with a state that does not match.
     ///
     /// ALWAYS input ONLY the state you received from the redirect url on your server.
-    /// If you arbitrarily put in your own state and it matches the [`ClientAuthRequest`],
-    /// then this will verify the client even if their state was incorrect (which is a security issue)!
+    /// If you arbitrarily put in your own state and it matches, then this will verify
+    /// the client even if their state was incorrect (which is a security issue)!
     pub async fn authenticate_finish(
         &mut self,
         client_state: CsrfToken,

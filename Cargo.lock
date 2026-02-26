@@ -863,7 +863,7 @@ dependencies = [
 
 [[package]]
 name = "myanimelist"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "chrono",
  "const_format",
