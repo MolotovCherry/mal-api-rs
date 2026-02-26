@@ -1,6 +1,6 @@
 [package]
 name = "myanimelist"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Cherry"]
 license = "MIT"
@@ -27,3 +27,6 @@ serde_with = "3.17.0"
 serde_qs = "1.0"
 itertools = "0.14"
 tracing = "0.1.44"
+
+[package.metadata.docs.rs]
+all-features = true
