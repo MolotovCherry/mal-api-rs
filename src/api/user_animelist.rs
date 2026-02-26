@@ -6,28 +6,28 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{AnimeList, AnimeListItem, AnimeSort, Username, WatchStatus},
-    MalClient, API_URL, RUNTIME,
+    MalClient, API_URL,
 };
 
 pub const USER_ANIMELIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/animelist");
 pub const USER_ANIME_ID: &str = formatcp!("{API_URL}/anime/{{ANIME_ID}}/my_list_status");
 
 #[derive(Debug, Clone)]
-pub struct UserAnimeListApi {
-    client: MalClient,
+pub struct UserAnimeListApi<'a> {
+    client: &'a MalClient,
 }
 
-impl UserAnimeListApi {
-    pub(crate) fn new(mal_client: MalClient) -> Self {
+impl<'a> UserAnimeListApi<'a> {
+    pub(crate) fn new(mal_client: &'a MalClient) -> Self {
         Self { client: mal_client }
     }
 
     /// GET user animelist
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get>
-    pub fn get(&self) -> UserAnimeListApiGet {
+    pub fn get(&self) -> UserAnimeListApiGet<'a> {
         UserAnimeListApiGet {
-            client: self.client.clone(),
+            client: self.client,
             user_name: None,
             status: None,
             sort: None,
@@ -47,9 +47,9 @@ impl UserAnimeListApi {
     /// This endpoint updates only values specified by the parameter.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put>
-    pub fn put(&self) -> UserAnimeListApiPut {
+    pub fn put(&self) -> UserAnimeListApiPut<'a> {
         UserAnimeListApiPut {
-            client: self.client.clone(),
+            client: self.client,
             anime_id: None,
             status: None,
             is_rewatching: None,
@@ -70,9 +70,9 @@ impl UserAnimeListApi {
     /// So be careful when retrying.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete>
-    pub fn delete(&self) -> UserAnimeListApiDelete {
+    pub fn delete(&self) -> UserAnimeListApiDelete<'a> {
         UserAnimeListApiDelete {
-            client: self.client.clone(),
+            client: self.client,
             anime_id: None,
         }
     }
@@ -89,9 +89,9 @@ impl UserAnimeListApi {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_put>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-pub struct UserAnimeListApiPut {
+pub struct UserAnimeListApiPut<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
     #[serde(skip)]
     anime_id: Option<u64>,
 
@@ -106,7 +106,7 @@ pub struct UserAnimeListApiPut {
     comments: Option<String>,
 }
 
-impl UserAnimeListApiPut {
+impl<'a> UserAnimeListApiPut<'a> {
     /// The anime id to update. This parameter is required.
     pub fn anime_id(mut self, id: u64) -> Self {
         self.anime_id = Some(id);
@@ -163,12 +163,13 @@ impl UserAnimeListApiPut {
         assert!(self.anime_id.is_some(), "anime_id is a required param");
 
         let url = USER_ANIME_ID.replace("{ANIME_ID}", &self.anime_id.unwrap().to_string());
-        self.client.http.put(url, Some(&self), true).await
+        self.client.api_request().put(url, Some(&self), true).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<AnimeListItem, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -180,12 +181,12 @@ impl UserAnimeListApiPut {
 ///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_my_list_status_delete>
 #[derive(Debug)]
-pub struct UserAnimeListApiDelete {
-    client: MalClient,
+pub struct UserAnimeListApiDelete<'a> {
+    client: &'a MalClient,
     anime_id: Option<u64>,
 }
 
-impl UserAnimeListApiDelete {
+impl<'a> UserAnimeListApiDelete<'a> {
     /// The anime id in the list to delete. This parameter is required.
     pub fn anime_id(mut self, id: u64) -> Self {
         self.anime_id = Some(id);
@@ -197,12 +198,13 @@ impl UserAnimeListApiDelete {
         assert!(self.anime_id.is_some(), "anime_id is a required param");
 
         let url = USER_ANIME_ID.replace("{ANIME_ID}", &self.anime_id.unwrap().to_string());
-        self.client.http.delete(url, true).await
+        self.client.api_request().delete(url, true).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<(), ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -211,9 +213,9 @@ impl UserAnimeListApiDelete {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_animelist_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct UserAnimeListApiGet {
+pub struct UserAnimeListApiGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
     #[serde(skip)]
     user_name: Option<Username>,
 
@@ -225,7 +227,7 @@ pub struct UserAnimeListApiGet {
     nsfw: Option<bool>,
 }
 
-impl UserAnimeListApiGet {
+impl<'a> UserAnimeListApiGet<'a> {
     /// User name. This parameter is required.
     pub fn user_name(mut self, user_name: Username) -> Self {
         self.user_name = Some(user_name);
@@ -284,11 +286,12 @@ impl UserAnimeListApiGet {
         // use access token when Me, and client token when other users
         let is_auth = matches!(self.user_name.as_ref().unwrap(), Username::Me);
 
-        self.client.http.get(url, is_auth).await
+        self.client.api_request().get(url, is_auth).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<AnimeList, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }

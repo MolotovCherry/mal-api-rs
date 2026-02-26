@@ -6,7 +6,7 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{MangaNode, MangaRankingType, MangaSingleList},
-    MalClient, API_URL, RUNTIME,
+    MalClient, API_URL,
 };
 
 pub const MANGA: &str = formatcp!("{API_URL}/manga");
@@ -14,35 +14,35 @@ pub const MANGA_ID: &str = formatcp!("{API_URL}/manga/{{MANGA_ID}}");
 pub const MANGA_RANKING: &str = formatcp!("{API_URL}/manga/ranking");
 
 #[derive(Debug)]
-pub struct MangaApi {
-    client: MalClient,
+pub struct MangaApi<'a> {
+    client: &'a MalClient,
 }
 
-impl MangaApi {
-    pub(crate) fn new(client: MalClient) -> Self {
+impl<'a> MangaApi<'a> {
+    pub(crate) fn new(client: &'a MalClient) -> Self {
         Self { client }
     }
 
     /// The manga GET endpoints.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/manga>
-    pub fn get(&self) -> MangaApiGet {
+    pub fn get(&self) -> MangaApiGet<'a> {
         MangaApiGet {
-            client: self.client.clone(),
+            client: self.client,
         }
     }
 }
 
 #[derive(Debug)]
-pub struct MangaApiGet {
-    client: MalClient,
+pub struct MangaApiGet<'a> {
+    client: &'a MalClient,
 }
 
-impl MangaApiGet {
+impl<'a> MangaApiGet<'a> {
     /// GET manga list.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get>
-    pub fn list(self) -> MangaApiGetList {
+    pub fn list(self) -> MangaApiGetList<'a> {
         MangaApiGetList {
             client: self.client,
             q: None,
@@ -56,7 +56,7 @@ impl MangaApiGet {
     /// GET manga details.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get>
-    pub fn details(self) -> MangaApiGetDetails {
+    pub fn details(self) -> MangaApiGetDetails<'a> {
         MangaApiGetDetails {
             client: self.client,
             manga_id: None,
@@ -67,7 +67,7 @@ impl MangaApiGet {
     /// GET manga ranking.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get>
-    pub fn ranking(self) -> MangaApiGetRanking {
+    pub fn ranking(self) -> MangaApiGetRanking<'a> {
         MangaApiGetRanking {
             client: self.client,
             ranking_type: None,
@@ -83,9 +83,9 @@ impl MangaApiGet {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-pub struct MangaApiGetList {
+pub struct MangaApiGetList<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
 
     q: Option<String>,
     limit: Option<u16>,
@@ -94,7 +94,7 @@ pub struct MangaApiGetList {
     nsfw: Option<bool>,
 }
 
-impl MangaApiGetList {
+impl<'a> MangaApiGetList<'a> {
     /// Search.
     pub fn q(mut self, q: &str) -> Self {
         self.q = Some(q.to_owned());
@@ -132,12 +132,13 @@ impl MangaApiGetList {
         let query = serde_qs::to_string(&self)?;
 
         let url = format!("{MANGA}?{query}");
-        self.client.http.get(url, false).await
+        self.client.api_request().get(url, false).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<MangaSingleList, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -146,16 +147,16 @@ impl MangaApiGetList {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-pub struct MangaApiGetDetails {
+pub struct MangaApiGetDetails<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
     #[serde(skip)]
     manga_id: Option<u64>,
 
     fields: Option<String>,
 }
 
-impl MangaApiGetDetails {
+impl<'a> MangaApiGetDetails<'a> {
     /// The manga id. This parameter is required.
     pub fn manga_id(mut self, id: u64) -> Self {
         self.manga_id = Some(id);
@@ -177,12 +178,13 @@ impl MangaApiGetDetails {
         let url = MANGA_ID.replace("{MANGA_ID}", &self.manga_id.unwrap().to_string());
 
         let url = format!("{url}?{query}");
-        self.client.http.get(url, false).await
+        self.client.api_request().get(url, false).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<MangaNode, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -191,9 +193,9 @@ impl MangaApiGetDetails {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_ranking_get>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-pub struct MangaApiGetRanking {
+pub struct MangaApiGetRanking<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
 
     ranking_type: Option<MangaRankingType>,
     limit: Option<u16>,
@@ -201,7 +203,7 @@ pub struct MangaApiGetRanking {
     fields: Option<String>,
 }
 
-impl MangaApiGetRanking {
+impl<'a> MangaApiGetRanking<'a> {
     /// The ranking type. This parameter is required.
     pub fn ranking_type(mut self, ranking: MangaRankingType) -> Self {
         self.ranking_type = Some(ranking);
@@ -238,11 +240,12 @@ impl MangaApiGetRanking {
         let query = serde_qs::to_string(&self)?;
         let url = format!("{MANGA_RANKING}?{query}");
 
-        self.client.http.get(url, false).await
+        self.client.api_request().get(url, false).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<(), ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }

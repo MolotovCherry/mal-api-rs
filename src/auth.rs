@@ -1,21 +1,21 @@
-use std::{fmt, future::Future, pin::Pin, time::Duration};
+use std::{fmt, time::Duration};
 
 use chrono::Utc;
 use const_format::formatcp;
 use oauth2::{
     basic::{BasicClient, BasicErrorResponse, BasicErrorResponseType},
     reqwest::Client,
-    AccessToken, EndpointNotSet, EndpointSet, Scope,
+    AccessToken, EndpointNotSet, EndpointSet, PkceCodeVerifier, Scope,
 };
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl,
     RefreshToken, StandardErrorResponse, TokenResponse, TokenUrl,
 };
-use sayuri::sync::Mutex;
+use reqwest::Url;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{BASE_URL, RUNTIME};
+use crate::BASE_URL;
 
 const AUTH_URL: &str = formatcp!("{BASE_URL}/oauth2/authorize");
 const TOKEN_URL: &str = formatcp!("{BASE_URL}/oauth2/token");
@@ -41,25 +41,8 @@ pub enum AuthError {
     RefreshTokenExpiredError,
 }
 
-type Callback = Box<
-    dyn Fn(
-            reqwest::Url,
-            CsrfToken,
-        ) -> Pin<
-            Box<
-                dyn Future<
-                        Output = Result<(AuthorizationCode, CsrfToken), Box<dyn std::error::Error>>,
-                    > + Send
-                    + 'static,
-            >,
-        > + Send
-        + 'static,
->;
-
 /// A (de)serializable version of [Auth]. Only serializes the access/refresh tokens and their expiry.
 /// This can be converted back to [Auth] if you provide your id, secret, and redirect url.
-///
-/// Callbacks are not saved or converted back. You must set it again manually.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthTokens {
     pub access_token: AccessToken,
@@ -86,7 +69,7 @@ impl AuthTokens {
         client_secret: ClientSecret,
         redirect_url: RedirectUrl,
     ) -> Auth {
-        let auth = Auth::new(client_id, client_secret, redirect_url);
+        let mut auth = Auth::new(client_id, client_secret, redirect_url);
 
         auth.set_access_token_unchecked(self.access_token.clone());
         auth.set_refresh_token_unchecked(self.refresh_token.clone());
@@ -102,7 +85,7 @@ impl AuthTokens {
         client_secret: ClientSecret,
         redirect_url: RedirectUrl,
     ) -> Auth {
-        let auth = Auth::new(client_id, client_secret, redirect_url);
+        let mut auth = Auth::new(client_id, client_secret, redirect_url);
 
         auth.set_access_token_unchecked(self.access_token);
         auth.set_refresh_token_unchecked(self.refresh_token);
@@ -114,19 +97,22 @@ impl AuthTokens {
 }
 
 /// Manages oauth2 and client id, client secret
+#[derive(Clone)]
 pub struct Auth {
     client: BasicClient<EndpointSet, EndpointNotSet, EndpointNotSet, EndpointNotSet, EndpointSet>,
     client_id: ClientId,
     client_secret: ClientSecret,
-    access_token: Mutex<AccessToken>,
-    refresh_token: Mutex<RefreshToken>,
+    access_token: AccessToken,
+    refresh_token: RefreshToken,
     // time in utc seconds when access token expires
-    expires_at: Mutex<u64>,
+    expires_at: u64,
     // time in utc seconds when refresh token expires
-    refresh_expires_at: Mutex<u64>,
-    scopes: Mutex<Vec<Scope>>,
-    callback: tokio::sync::Mutex<Callback>,
+    refresh_expires_at: u64,
+    scopes: Vec<Scope>,
     async_client: Client,
+    // I'd use PckeCodeVerifier here, but it's !Clone
+    pkce_code_verifier: Option<String>,
+    client_req: Option<ClientAuthRequest>,
 }
 
 impl fmt::Debug for Auth {
@@ -152,7 +138,6 @@ impl fmt::Debug for Auth {
             .field("expires_at", &expires_at)
             .field("refresh_expires_at", &refresh_expires_at)
             .field("scopes", &scopes)
-            .field("callback", &"unknown")
             .finish()
     }
 }
@@ -173,21 +158,19 @@ impl Auth {
             client,
             client_id,
             client_secret,
-            access_token: Mutex::new(AccessToken::new(String::new())),
-            refresh_token: Mutex::new(RefreshToken::new(String::new())),
-            expires_at: Mutex::new(0),
-            refresh_expires_at: Mutex::new(0),
-            scopes: Mutex::new(Vec::new()),
-            callback: tokio::sync::Mutex::new(Box::new(|_, _| {
-                unimplemented!("oauth2 callback not implemented")
-            })),
+            access_token: AccessToken::new(String::new()),
+            refresh_token: RefreshToken::new(String::new()),
+            expires_at: 0,
+            refresh_expires_at: 0,
+            scopes: Vec::new(),
             async_client: Client::new(),
+            pkce_code_verifier: None,
+            client_req: None,
         }
     }
 
     /// Return client tokens to save user creds that can be serialized/deserialized.
     /// serializes access/refresh tokens, and their expiry
-    /// Does not serialize client_id, client_secret, scopes, or callback
     pub fn to_tokens(&self) -> AuthTokens {
         let at = self.access_token();
         let rt = self.refresh_token();
@@ -214,119 +197,75 @@ impl Auth {
 
     /// Get the access token.
     pub fn access_token(&self) -> AccessToken {
-        self.access_token.lock().clone()
+        self.access_token.clone()
     }
 
     /// Get the refresh token.
     pub fn refresh_token(&self) -> RefreshToken {
-        self.refresh_token.lock().clone()
+        self.refresh_token.clone()
     }
 
-    /// Manually set the refresh token. This is handled automatically by [`Self::refresh()`], [`Self::refresh_blocking()`], [`Self::regenerate()`], and [`Self::regenerate_blocking()`].
+    /// Manually set the refresh token. This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct refresh token expiry time as well.
-    pub fn set_refresh_token_unchecked(&self, token: RefreshToken) {
-        let mut lock = self.refresh_token.lock();
-        *lock = token;
+    pub fn set_refresh_token_unchecked(&mut self, token: RefreshToken) {
+        self.refresh_token = token;
     }
 
-    /// Manually set the access token. This is handled automatically by [`Self::refresh()`], [`Self::refresh_blocking()`], [`Self::regenerate()`], and [`Self::regenerate_blocking()`].
+    /// Manually set the access token. This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct access token expiry time as well.
-    pub fn set_access_token_unchecked(&self, token: AccessToken) {
-        let mut lock = self.access_token.lock();
-        *lock = token;
+    pub fn set_access_token_unchecked(&mut self, token: AccessToken) {
+        self.access_token = token;
     }
 
     /// Updates the access token expiry time. Expiry is utc seconds
-    /// This is handled automatically by [`Self::refresh()`], [`Self::refresh_blocking()`], [`Self::regenerate()`], and [`Self::regenerate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct access token as well.
-    pub fn set_expires_at_unchecked(&self, expiry: u64) {
-        let mut lock = self.expires_at.lock();
-        *lock = expiry;
+    pub fn set_expires_at_unchecked(&mut self, expiry: u64) {
+        self.expires_at = expiry;
     }
 
     /// Updates the access token expiry time. Duration is how long from NOW it will after in.
-    /// This is handled automatically by [`Self::refresh()`], [`Self::refresh_blocking()`], [`Self::regenerate()`], and [`Self::regenerate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct access token as well.
-    pub fn set_expires_in_unchecked(&self, duration: Duration) {
-        let mut lock = self.expires_at.lock();
-        *lock = Utc::now().timestamp() as u64 + duration.as_secs();
+    pub fn set_expires_in_unchecked(&mut self, duration: Duration) {
+        self.expires_at = Utc::now().timestamp() as u64 + duration.as_secs();
     }
 
     /// Updates the refresh token expiry time. Duration is how long from NOW it will after in.
-    /// This is handled automatically by [`Self::refresh()`], [`Self::refresh_blocking()`], [`Self::regenerate()`], and [`Self::regenerate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct refresh token as well.
-    pub fn set_refresh_expires_in_unchecked(&self, duration: Duration) {
-        let mut lock = self.refresh_expires_at.lock();
-        *lock = Utc::now().timestamp() as u64 + duration.as_secs();
+    pub fn set_refresh_expires_in_unchecked(&mut self, duration: Duration) {
+        self.refresh_expires_at = Utc::now().timestamp() as u64 + duration.as_secs();
     }
 
     /// Updates the refresh token expiry time. Expiry is utc seconds
-    /// This is handled automatically by [`Self::refresh()`], [`Self::refresh_blocking()`], [`Self::regenerate()`], and [`Self::regenerate_blocking()`].
+    /// This is handled automatically by [`Auth::refresh()`], [`Auth::refresh_blocking()`], [`Auth::authenticate()`], and [`Auth::authenticate_blocking()`].
     ///
     /// This method is safe in terms of no UB, however it is unchecked because it is possible to cause inconsistent state.
     ///
     /// Caller agrees to also set the correct access token as well.
-    pub fn set_refresh_expires_at_unchecked(&self, expiry: u64) {
-        let mut lock = self.refresh_expires_at.lock();
-        *lock = expiry;
+    pub fn set_refresh_expires_at_unchecked(&mut self, expiry: u64) {
+        self.refresh_expires_at = expiry;
     }
 
     /// Add an oauth2 scope. Use this before you generate a new token.
-    pub fn add_scope(&self, scope: Scope) {
-        let mut lock = self.scopes.lock();
-        lock.push(scope);
-    }
-
-    /// Set the callback used when running [`Self::regenerate()`].
-    /// This passes in a [`CsrfToken`] representing the client state this callback is looking for.
-    /// You can know which client request is the correct client because the states match each other.
-    ///
-    /// You may return success from this function ONLY if the state is correct.
-    /// You may want to make this timeout so [`Self::regenerate()`] doesn't block forever.
-    pub async fn set_callback<
-        F: Fn(reqwest::Url, CsrfToken) -> Fut + Send + 'static,
-        Fut: Future<Output = Result<(AuthorizationCode, CsrfToken), Box<dyn std::error::Error>>>
-            + 'static
-            + Send,
-    >(
-        &self,
-        f: F,
-    ) {
-        let mut lock = self.callback.lock().await;
-        *lock = Box::new(move |url, state| Box::pin(f(url, state)));
-    }
-
-    /// Set the callback used when running [`Self::regenerate()`].
-    /// This passes in a [`CsrfToken`] representing the client state this callback is looking for.
-    /// You can know which client request is the correct client because the states match each other.
-    ///
-    /// You may return success from this function ONLY if the state is correct.
-    /// You may want to make this timeout so [`Self::regenerate()`] doesn't block forever.
-    pub fn set_callback_blocking<
-        F: Fn(reqwest::Url, CsrfToken) -> Fut + Send + 'static,
-        Fut: Future<Output = Result<(AuthorizationCode, CsrfToken), Box<dyn std::error::Error>>>
-            + 'static
-            + Send,
-    >(
-        &self,
-        f: F,
-    ) {
-        RUNTIME.block_on(self.set_callback(f))
+    pub fn add_scope(&mut self, scope: Scope) {
+        self.scopes.push(scope);
     }
 
     /// Is the current access token valid?
@@ -339,7 +278,7 @@ impl Auth {
     /// If you want to keep state consistent if you're manually setting those, then make sure to set both
     /// the access token and its expiry time.
     pub fn is_access_valid(&self) -> bool {
-        (Utc::now().timestamp() as u64) < *self.expires_at.lock()
+        (Utc::now().timestamp() as u64) < self.expires_at
     }
 
     /// Is the current refresh token valid?
@@ -352,16 +291,16 @@ impl Auth {
     /// If you want to keep state consistent if you're manually setting those, then make sure to set both
     /// the refresh token and its expiry time.
     pub fn is_refresh_valid(&self) -> bool {
-        (Utc::now().timestamp() as u64) < *self.refresh_expires_at.lock()
+        (Utc::now().timestamp() as u64) < self.refresh_expires_at
     }
 
     /// Automatically regnerate refresh token if possible
     ///
-    /// If this fails, you should regenerate the token again.
+    /// If this fails, you should authenticate the token again.
     ///
     /// This is subject to an inconsistent state if you are manually setting
     /// access/refresh token and/or their expiry times.
-    pub async fn try_refresh(&self) -> Result<(), TokenError> {
+    pub async fn try_refresh(&mut self) -> Result<(), TokenError> {
         let refresh_valid = self.is_refresh_valid();
         let access_valid = self.is_access_valid();
 
@@ -379,34 +318,33 @@ impl Auth {
 
     /// Automatically regnerate refresh token if possible
     ///
-    /// If this fails, you should regenerate the token again.
+    /// If this fails, you should authenticate the token again.
     ///
     /// This is subject to an inconsistent state if you are manually setting
     /// access/refresh token and/or their expiry times.
-    pub fn try_refresh_blocking(&self) -> Result<(), TokenError> {
-        RUNTIME.block_on(self.try_refresh())
+    #[cfg(feature = "blocking")]
+    pub fn try_refresh_blocking(&mut self) -> Result<(), TokenError> {
+        crate::RUNTIME.block_on(self.try_refresh())
     }
 
     /// Time in utc seconds when access token expires.
     pub fn expires_at(&self) -> u64 {
-        *self.expires_at.lock()
+        self.expires_at
     }
 
     /// Time in utc seconds when refresh token expires.
     pub fn refresh_expires_at(&self) -> u64 {
-        *self.expires_at.lock()
+        self.refresh_expires_at
     }
 
     /// How many days refresh token is valid for
     const DAYS: u64 = 31;
 
     /// Exchange refresh token for new access token.
-    pub async fn refresh(&self) -> Result<(), TokenError> {
-        let token = self.refresh_token.lock().clone();
-
+    pub async fn refresh(&mut self) -> Result<(), TokenError> {
         let token = self
             .client
-            .exchange_refresh_token(&token)
+            .exchange_refresh_token(&self.refresh_token)
             .request_async(&self.async_client)
             .await
             .map_err(|e| TokenError::OAuth2(e.to_string()))?;
@@ -428,43 +366,65 @@ impl Auth {
     }
 
     /// Exchange refresh token for new access token.
-    pub fn refresh_blocking(&self) -> Result<(), TokenError> {
-        RUNTIME.block_on(self.refresh())
+    #[cfg(feature = "blocking")]
+    pub fn refresh_blocking(&mut self) -> Result<(), TokenError> {
+        crate::RUNTIME.block_on(self.refresh())
     }
 
     /// Begin a new oauth2 access token generation procedure.
     ///
-    /// Requires client to visit the url provided to the callback.
-    /// Callback receives both url and state, and knows which client is correct
-    /// by matching the passed in state with the state received from your server redirect url.
-    ///
-    /// This forever blocks if callback does not return. It is best that you set a timeout in the callback.
-    pub async fn regenerate(&self) -> Result<(), TokenError> {
+    /// Returns both url and state belonging to this authenticate request. Client should visit the auth url and authenticate.
+    /// After client auths and gets sent to the redirect url on your server, if their state matches
+    /// the state returned from this method, call [`Auth::authenticate_finish`] with their authorization code.
+    pub fn authenticate(&mut self) -> Result<ClientAuthRequest, TokenError> {
         let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_plain();
-
-        let scopes = self.scopes.lock().clone();
 
         let (auth_url, state) = self
             .client
             .authorize_url(CsrfToken::new_random)
-            .add_scopes(scopes.into_iter())
+            .add_scopes(self.scopes.iter().cloned())
             .set_pkce_challenge(pkce_challenge)
             .url();
 
-        // the state that gets passed into the callback is the only one that is valid to return
-        // the code back to the caller. make sure they match, or regenerate() will return an error
-        let (auth_code, client_state) = {
-            let callback = self.callback.lock().await;
-            match callback(auth_url, state.clone()).await {
-                Ok(v) => v,
-                Err(e) => return Err(TokenError::Callback(e.to_string())),
-            }
-        };
+        let req = ClientAuthRequest { auth_url, state };
 
+        self.pkce_code_verifier = Some(pkce_verifier.into_secret());
+        self.client_req = Some(req.clone());
+
+        Ok(req)
+    }
+
+    /// So, a client has now authorized themselves, visited the redirect url on your server, and
+    /// you've verified the state you received in the url matches up to this [`ClientAuthRequest`].
+    /// Please pass in the corresponding [`ClientAuthRequest`], along with the state and authorization code
+    /// you received in the redirect url.
+    ///
+    /// Note: Is it valid to call this method with a request and state that do not match.
+    ///
+    /// ALWAYS input ONLY the state you received from the redirect url on your server.
+    /// If you arbitrarily put in your own state and it matches the [`ClientAuthRequest`],
+    /// then this will verify the client even if their state was incorrect (which is a security issue)!
+    pub async fn authenticate_finish(
+        &mut self,
+        client_state: CsrfToken,
+        auth_code: AuthorizationCode,
+    ) -> Result<(), TokenError> {
         // ensure state is correct
-        if state.secret() != client_state.secret() {
+        if self
+            .client_req
+            .as_ref()
+            .is_some_and(|state| state.state.secret() != client_state.secret())
+        {
             return Err(TokenError::StateMismatch);
         }
+
+        let pkce_verifier = {
+            let Some(pkce_verifier) = &self.pkce_code_verifier else {
+                return Err(TokenError::PkceCodeVerifierMissing);
+            };
+
+            PkceCodeVerifier::new(pkce_verifier.clone())
+        };
 
         // now get access token
         let Ok(token) = self
@@ -476,6 +436,10 @@ impl Auth {
         else {
             return Err(TokenError::Access);
         };
+
+        // request succeeded; we don't need these anymore
+        self.pkce_code_verifier.take();
+        self.client_req.take();
 
         self.set_expires_at_unchecked(
             Utc::now().timestamp() as u64 + token.expires_in().unwrap().as_secs(),
@@ -493,23 +457,43 @@ impl Auth {
         Ok(())
     }
 
-    /// Begin a new oauth2 access token generation procedure.
-    ///
-    /// Requires client to visit the url provided to the callback.
-    /// Callback receives both url and state, and knows which client is correct
-    /// by matching the passed in state with the state received from your server redirect url.
-    ///
-    /// This forever blocks if callback does not return. It is best that you set a timeout in the callback.
-    pub fn regenerate_blocking(&self) -> Result<(), TokenError> {
-        RUNTIME.block_on(self.regenerate())
+    #[cfg(feature = "blocking")]
+    pub fn authenticate_finish_blocking(
+        &mut self,
+        client_state: CsrfToken,
+        auth_code: AuthorizationCode,
+    ) -> Result<(), TokenError> {
+        let fut = self.authenticate_finish(client_state, auth_code);
+        crate::RUNTIME.block_on(fut)
+    }
+}
+
+/// This type represents a particular client's request to authenticate
+/// to your service.
+#[derive(Clone)]
+pub struct ClientAuthRequest {
+    auth_url: Url,
+    state: CsrfToken,
+}
+
+impl ClientAuthRequest {
+    /// The url the client should visit to authenticate
+    pub fn auth_url(&self) -> &Url {
+        &self.auth_url
+    }
+
+    /// After the client visits the auth url and authorizes,
+    /// you will receive a state param in the redirect url on your server.
+    /// If it matches the state this method returns, the client belongs
+    /// to this particular request, and is verified.
+    pub fn state(&self) -> &CsrfToken {
+        &self.state
     }
 }
 
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
 pub enum TokenError {
-    #[error("callback failed")]
-    Callback(String),
     #[error("refresh token is already expired")]
     RefreshExpired,
     #[error("{0}")]
@@ -522,4 +506,6 @@ pub enum TokenError {
     Parse(#[from] ::oauth2::url::ParseError),
     #[error("state verification failed")]
     StateMismatch,
+    #[error("PkceCodeVerifier not set; please call authenticate() first")]
+    PkceCodeVerifierMissing,
 }

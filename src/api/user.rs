@@ -6,40 +6,40 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{User, Username},
-    MalClient, API_URL, RUNTIME,
+    MalClient, API_URL,
 };
 
 const USER_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}");
 
 #[derive(Debug, Clone)]
-pub struct UserApi {
-    client: MalClient,
+pub struct UserApi<'a> {
+    client: &'a MalClient,
 }
 
-impl UserApi {
-    pub(crate) fn new(mal_client: MalClient) -> Self {
+impl<'a> UserApi<'a> {
+    pub(crate) fn new(mal_client: &'a MalClient) -> Self {
         Self { client: mal_client }
     }
 
     /// User get endpoints
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user>
-    pub fn get(&self) -> UserApiGet {
+    pub fn get(&self) -> UserApiGet<'a> {
         UserApiGet {
-            client: self.client.clone(),
+            client: self.client,
         }
     }
 }
 
-pub struct UserApiGet {
-    client: MalClient,
+pub struct UserApiGet<'a> {
+    client: &'a MalClient,
 }
 
-impl UserApiGet {
+impl<'a> UserApiGet<'a> {
     /// GET user information
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get>
-    pub fn information(self) -> UserInformationGet {
+    pub fn information(self) -> UserInformationGet<'a> {
         UserInformationGet {
             client: self.client,
             fields: None,
@@ -52,14 +52,14 @@ impl UserApiGet {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct UserInformationGet {
+pub struct UserInformationGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
 
     fields: Option<String>,
 }
 
-impl UserInformationGet {
+impl<'a> UserInformationGet<'a> {
     pub fn fields<I: IntoIterator<Item = impl AsRef<str>>>(mut self, fields: I) -> Self {
         let fields = fields.into_iter().map(|f| f.as_ref().to_string()).join(",");
 
@@ -73,11 +73,12 @@ impl UserInformationGet {
         let query = serde_qs::to_string(&self)?;
         let url = format!("{url}?{query}");
 
-        self.client.http.get(url, true).await
+        self.client.api_request().get(url, true).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<User, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }

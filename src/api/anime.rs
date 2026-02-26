@@ -3,14 +3,13 @@ use itertools::Itertools as _;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 
-use crate::API_URL;
-use crate::{api_request::ApiError, MalClient};
 use crate::{
+    api_request::ApiError,
     objects::{
         AnimeList, AnimeNode, AnimeRankingType, AnimeSeasonSort, AnimeSingleList, RankingList,
         SeasonList, SeasonType,
     },
-    RUNTIME,
+    MalClient, API_URL,
 };
 
 const ANIME_URL: &str = formatcp!("{API_URL}/anime");
@@ -20,21 +19,21 @@ const ANIME_SEASON: &str = formatcp!("{API_URL}/anime/season/{{YEAR}}/{{SEASON}}
 const ANIME_SUGGESTIONS: &str = formatcp!("{API_URL}/anime/suggestions");
 
 #[derive(Debug, Clone)]
-pub struct AnimeApi {
-    client: MalClient,
+pub struct AnimeApi<'a> {
+    client: &'a MalClient,
 }
 
-impl AnimeApi {
-    pub(crate) fn new(mal_client: MalClient) -> Self {
+impl<'a> AnimeApi<'a> {
+    pub(crate) fn new(mal_client: &'a MalClient) -> Self {
         Self { client: mal_client }
     }
 
     /// Anime GET endpoints
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
-    pub fn get(&self) -> AnimeApiGet {
+    pub fn get(&self) -> AnimeApiGet<'a> {
         AnimeApiGet {
-            client: self.client.clone(),
+            client: self.client,
         }
     }
 }
@@ -43,15 +42,15 @@ impl AnimeApi {
 ///
 /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
 #[derive(Debug)]
-pub struct AnimeApiGet {
-    client: MalClient,
+pub struct AnimeApiGet<'a> {
+    client: &'a MalClient,
 }
 
-impl AnimeApiGet {
+impl<'a> AnimeApiGet<'a> {
     /// GET anime list.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get>
-    pub fn list(self) -> AnimeListGet {
+    pub fn list(self) -> AnimeListGet<'a> {
         AnimeListGet {
             client: self.client,
             q: None,
@@ -65,7 +64,7 @@ impl AnimeApiGet {
     /// GET anime details.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get>
-    pub fn details(self) -> AnimeDetailsGet {
+    pub fn details(self) -> AnimeDetailsGet<'a> {
         AnimeDetailsGet {
             client: self.client,
             anime_id: None,
@@ -76,7 +75,7 @@ impl AnimeApiGet {
     /// GET anime ranking.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get>
-    pub fn ranking(self) -> AnimeRankingGet {
+    pub fn ranking(self) -> AnimeRankingGet<'a> {
         AnimeRankingGet {
             client: self.client,
             ranking_type: None,
@@ -89,7 +88,7 @@ impl AnimeApiGet {
     /// GET seasonal anime.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get>
-    pub fn seasonal(self) -> AnimeSeasonalGet {
+    pub fn seasonal(self) -> AnimeSeasonalGet<'a> {
         AnimeSeasonalGet {
             client: self.client,
             year: None,
@@ -105,7 +104,7 @@ impl AnimeApiGet {
     /// GET suggested anime.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get>
-    pub fn suggested(self) -> AnimeSuggestedGet {
+    pub fn suggested(self) -> AnimeSuggestedGet<'a> {
         AnimeSuggestedGet {
             client: self.client,
             limit: None,
@@ -121,9 +120,9 @@ impl AnimeApiGet {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct AnimeListGet {
+pub struct AnimeListGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
 
     q: Option<String>,
     limit: Option<u32>,
@@ -132,7 +131,7 @@ pub struct AnimeListGet {
     nsfw: Option<bool>,
 }
 
-impl AnimeListGet {
+impl<'a> AnimeListGet<'a> {
     /// Search.
     pub fn q(mut self, q: &str) -> Self {
         self.q = Some(q.to_owned());
@@ -171,12 +170,13 @@ impl AnimeListGet {
 
         let url = format!("{ANIME_URL}?{query}");
 
-        self.client.http.get(url, false).await
+        self.client.api_request().get(url, false).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<AnimeList, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -185,16 +185,16 @@ impl AnimeListGet {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_anime_id_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct AnimeDetailsGet {
+pub struct AnimeDetailsGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
     #[serde(skip)]
     anime_id: Option<u64>,
 
     fields: Option<String>,
 }
 
-impl AnimeDetailsGet {
+impl<'a> AnimeDetailsGet<'a> {
     /// The anime id.
     pub fn anime_id(mut self, id: u64) -> Self {
         self.anime_id = Some(id);
@@ -216,12 +216,13 @@ impl AnimeDetailsGet {
         let query = serde_qs::to_string(&self)?;
         let url = format!("{url}?{query}");
 
-        self.client.http.get(url, false).await
+        self.client.api_request().get(url, false).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<AnimeNode, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -230,9 +231,9 @@ impl AnimeDetailsGet {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_ranking_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct AnimeRankingGet {
+pub struct AnimeRankingGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
 
     ranking_type: Option<AnimeRankingType>,
     limit: Option<u16>,
@@ -240,7 +241,7 @@ pub struct AnimeRankingGet {
     fields: Option<String>,
 }
 
-impl AnimeRankingGet {
+impl<'a> AnimeRankingGet<'a> {
     /// The ranking type. This parameter is required.
     pub fn ranking_type(mut self, ranking_type: AnimeRankingType) -> Self {
         self.ranking_type = Some(ranking_type);
@@ -277,12 +278,13 @@ impl AnimeRankingGet {
         let query = serde_qs::to_string(&self)?;
         let url = format!("{ANIME_RANKING}?{query}");
 
-        self.client.http.get(url, false).await
+        self.client.api_request().get(url, false).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<RankingList, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -291,9 +293,9 @@ impl AnimeRankingGet {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_season_year_season_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct AnimeSeasonalGet {
+pub struct AnimeSeasonalGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
     #[serde(skip)]
     year: Option<u16>,
     #[serde(skip)]
@@ -306,7 +308,7 @@ pub struct AnimeSeasonalGet {
     nsfw: Option<bool>,
 }
 
-impl AnimeSeasonalGet {
+impl<'a> AnimeSeasonalGet<'a> {
     /// Year. This parameter is required.
     pub fn year(mut self, year: u16) -> Self {
         self.year = Some(year);
@@ -363,12 +365,13 @@ impl AnimeSeasonalGet {
 
         let url = format!("{url}?{query}");
 
-        self.client.http.get(url, false).await
+        self.client.api_request().get(url, false).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<SeasonList, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -377,9 +380,9 @@ impl AnimeSeasonalGet {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/anime_suggestions_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct AnimeSuggestedGet {
+pub struct AnimeSuggestedGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
 
     limit: Option<u16>,
     offset: Option<u64>,
@@ -387,7 +390,7 @@ pub struct AnimeSuggestedGet {
     nsfw: Option<bool>,
 }
 
-impl AnimeSuggestedGet {
+impl<'a> AnimeSuggestedGet<'a> {
     /// Default: 100
     /// The maximum value is 100.
     pub fn limit(mut self, limit: u16) -> Self {
@@ -418,11 +421,12 @@ impl AnimeSuggestedGet {
     pub async fn send(self) -> Result<AnimeSingleList, ApiError> {
         let query = serde_qs::to_string(&self)?;
         let url = format!("{ANIME_SUGGESTIONS}?{query}");
-        self.client.http.get(url, true).await
+        self.client.api_request().get(url, true).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<AnimeSingleList, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }

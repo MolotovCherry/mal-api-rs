@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
-use reqwest::{Client, Error, IntoUrl, StatusCode};
+use reqwest::{Error, IntoUrl, StatusCode};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tracing::debug;
 
-use crate::Auth;
+use crate::MalClient;
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) enum RequestMethod {
@@ -56,17 +54,16 @@ struct ApiRequestError {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct ApiRequest {
-    auth: Arc<Auth>,
-    http: reqwest::Client,
+pub(crate) struct ApiRequest<'a> {
+    client: &'a MalClient,
 }
 
-impl ApiRequest {
-    pub fn new(auth: Arc<Auth>, http: Client) -> Self {
-        Self { auth, http }
+impl<'a> ApiRequest<'a> {
+    pub(crate) fn new(client: &'a MalClient) -> Self {
+        Self { client }
     }
 
-    pub async fn get<D>(&self, url: impl IntoUrl, is_auth: bool) -> Result<D, ApiError>
+    pub(crate) async fn get<D>(&self, url: impl IntoUrl, is_auth: bool) -> Result<D, ApiError>
     where
         D: DeserializeOwned,
     {
@@ -74,7 +71,7 @@ impl ApiRequest {
             .await
     }
 
-    pub async fn delete<D>(&self, url: impl IntoUrl, is_auth: bool) -> Result<D, ApiError>
+    pub(crate) async fn delete<D>(&self, url: impl IntoUrl, is_auth: bool) -> Result<D, ApiError>
     where
         D: DeserializeOwned,
     {
@@ -82,7 +79,7 @@ impl ApiRequest {
             .await
     }
 
-    pub async fn put<D, P: Serialize>(
+    pub(crate) async fn put<D, P: Serialize>(
         &self,
         url: impl IntoUrl,
         data: Option<P>,
@@ -108,9 +105,9 @@ impl ApiRequest {
         D: DeserializeOwned,
     {
         let mut request = match method {
-            RequestMethod::Get => self.http.get(url.into_url()?),
-            RequestMethod::Delete => self.http.delete(url.into_url()?),
-            RequestMethod::Put => self.http.put(url.into_url()?),
+            RequestMethod::Get => self.client.http.get(url.into_url()?),
+            RequestMethod::Delete => self.client.http.delete(url.into_url()?),
+            RequestMethod::Put => self.client.http.put(url.into_url()?),
         };
 
         if matches!(method, RequestMethod::Put) {
@@ -120,9 +117,9 @@ impl ApiRequest {
         }
 
         let request = if is_auth {
-            request.bearer_auth(self.auth.access_token().secret())
+            request.bearer_auth(self.client.auth_tokens.access_token.secret())
         } else {
-            request.header("X-MAL-CLIENT-ID", &*self.auth.client_id())
+            request.header("X-MAL-CLIENT-ID", &*self.client.client_id)
         };
 
         let response = request.send().await?;

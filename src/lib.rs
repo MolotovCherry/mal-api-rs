@@ -2,15 +2,16 @@ pub mod api;
 pub mod api_request;
 pub mod auth;
 pub mod objects;
-mod utils;
 
-use std::sync::Arc;
+#[cfg(feature = "blocking")]
+use std::sync::LazyLock;
 
 pub use oauth2::{
     AccessToken, AuthorizationCode, ClientId, ClientSecret, CsrfToken, RedirectUrl, RefreshToken,
     Scope,
 };
 use reqwest::{Client, ClientBuilder};
+#[cfg(feature = "blocking")]
 use tokio::runtime::{Builder, Runtime};
 
 use crate::{
@@ -19,13 +20,13 @@ use crate::{
         user_animelist::UserAnimeListApi, user_mangalist::UserMangaListApi,
     },
     api_request::ApiRequest,
-    auth::{Auth, TokenError},
-    utils::LazyLock,
+    auth::AuthTokens,
 };
 
 const BASE_URL: &str = "https://myanimelist.net/v1";
 const API_URL: &str = "https://api.myanimelist.net/v2";
 
+#[cfg(feature = "blocking")]
 static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
     Builder::new_multi_thread()
         .enable_all()
@@ -40,63 +41,73 @@ static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
 /// <https://myanimelist.net/apiconfig/references/api/v2>
 #[derive(Debug, Clone)]
 pub struct MalClient {
-    /// Holds oauth2 information. You are required to call functions on this to handle
-    /// oauth2 token generation, token refreshing, and webserver redirect callback
-    pub auth: Arc<Auth>,
-    http: ApiRequest,
+    auth_tokens: AuthTokens,
+    http: Client,
+    client_id: ClientId,
 }
 
 impl MalClient {
+    pub fn builder() -> MalClientBuilder {
+        MalClientBuilder::new()
+    }
+
+    pub(crate) fn api_request(&self) -> ApiRequest<'_> {
+        ApiRequest::new(self)
+    }
+
+    pub fn set_tokens(&mut self, tokens: AuthTokens) {
+        self.auth_tokens = tokens;
+    }
+
     /// The anime endpoint
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/anime>
-    pub fn anime(&self) -> AnimeApi {
-        AnimeApi::new(self.clone())
+    pub fn anime(&self) -> AnimeApi<'_> {
+        AnimeApi::new(self)
     }
 
     /// The manga endpoint
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/manga>
-    pub fn manga(&self) -> MangaApi {
-        MangaApi::new(self.clone())
+    pub fn manga(&self) -> MangaApi<'_> {
+        MangaApi::new(self)
     }
 
     /// The user-animelist endpoint
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user-animelist>
-    pub fn user_animelist(&self) -> UserAnimeListApi {
-        UserAnimeListApi::new(self.clone())
+    pub fn user_animelist(&self) -> UserAnimeListApi<'_> {
+        UserAnimeListApi::new(self)
     }
 
     /// The user-mangalist endpoint
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user-mangalist>
-    pub fn user_mangalist(&self) -> UserMangaListApi {
-        UserMangaListApi::new(self.clone())
+    pub fn user_mangalist(&self) -> UserMangaListApi<'_> {
+        UserMangaListApi::new(self)
     }
 
     /// The user endpoint
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/user>
-    pub fn user(&self) -> UserApi {
-        UserApi::new(self.clone())
+    pub fn user(&self) -> UserApi<'_> {
+        UserApi::new(self)
     }
 
     /// The forum endpoint
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#tag/forum>
-    pub fn forum(&self) -> ForumApi {
-        ForumApi::new(self.clone())
+    pub fn forum(&self) -> ForumApi<'_> {
+        ForumApi::new(self)
     }
 }
 
 /// A builder for [MalClient]
 #[derive(Default)]
 pub struct MalClientBuilder {
-    auth: Option<Arc<Auth>>,
+    auth_tokens: Option<AuthTokens>,
     client_id: Option<ClientId>,
-    client_secret: Option<ClientSecret>,
-    redirect_url: Option<RedirectUrl>,
+    client: Option<Client>,
     #[allow(clippy::complexity)]
     http_cb: Option<Box<dyn FnOnce(ClientBuilder) -> Result<Client, reqwest::Error> + 'static>>,
 }
@@ -109,16 +120,8 @@ impl MalClientBuilder {
     /// Use your own [Auth] value.
     ///
     /// If [Auth] is not provided, you must set client_id, client_secret, and redirect_url.
-    pub fn auth(mut self, auth: Auth) -> Self {
-        self.auth = Some(Arc::new(auth));
-        self
-    }
-
-    /// Use a shared [Auth] value you have.
-    ///
-    /// If [Auth] is not provided, you must set client_id, client_secret, and redirect_url.
-    pub fn auth_shared(mut self, auth: Arc<Auth>) -> Self {
-        self.auth = Some(auth);
+    pub fn auth_tokens(mut self, auth: AuthTokens) -> Self {
+        self.auth_tokens = Some(auth);
         self
     }
 
@@ -128,19 +131,13 @@ impl MalClientBuilder {
         self
     }
 
-    /// The client secret used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder.
-    pub fn client_secret(mut self, client_secret: ClientSecret) -> Self {
-        self.client_secret = Some(client_secret);
+    /// Provide a reqwest client.
+    pub fn http(mut self, client: Client) -> Self {
+        self.client = Some(client);
         self
     }
 
-    /// The redirect_url used to make a new [Auth]. No need to specify if you provided an [Auth] to the builder.
-    pub fn redirect_url(mut self, redirect_url: RedirectUrl) -> Self {
-        self.redirect_url = Some(redirect_url);
-        self
-    }
-
-    /// Customize the reqwest client (e.g. change the useragent).
+    /// Customize a reqwest client (e.g. change the useragent).
     pub fn http_builder(
         mut self,
         cb: impl FnOnce(ClientBuilder) -> Result<Client, reqwest::Error> + 'static,
@@ -150,27 +147,19 @@ impl MalClientBuilder {
     }
 
     pub fn build(self) -> Result<MalClient, MalClientError> {
-        let auth = if let Some(auth) = self.auth {
-            auth
-        } else {
-            let Some(client_id) = self.client_id else {
-                return Err(MalClientError::Builder("client_id".to_owned()));
-            };
+        let Some(client_id) = self.client_id else {
+            return Err(MalClientError::Builder("client_id".to_owned()));
+        };
 
-            let Some(client_secret) = self.client_secret else {
-                return Err(MalClientError::Builder("client_secret".to_owned()));
-            };
-
-            let Some(redirect_url) = self.redirect_url else {
-                return Err(MalClientError::Builder("redirect_url".to_owned()));
-            };
-
-            Arc::new(Auth::new(client_id, client_secret, redirect_url))
+        let Some(auth) = self.auth_tokens else {
+            return Err(MalClientError::Builder("auth_tokens".to_owned()));
         };
 
         let http = if let Some(cb) = self.http_cb {
             let builder = ClientBuilder::new();
             cb(builder)?
+        } else if let Some(client) = self.client {
+            client
         } else {
             ClientBuilder::new()
                 .user_agent(concat!(
@@ -181,9 +170,11 @@ impl MalClientBuilder {
                 .build()?
         };
 
-        let http = ApiRequest::new(auth.clone(), http);
-
-        let mal_client = MalClient { auth, http };
+        let mal_client = MalClient {
+            auth_tokens: auth,
+            http,
+            client_id,
+        };
 
         Ok(mal_client)
     }
@@ -195,6 +186,4 @@ pub enum MalClientError {
     Reqwest(#[from] reqwest::Error),
     #[error("field '{0}' is required")]
     Builder(String),
-    #[error("{0}")]
-    Token(#[from] TokenError),
 }

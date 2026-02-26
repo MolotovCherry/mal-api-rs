@@ -6,28 +6,28 @@ use serde_with::skip_serializing_none;
 use crate::{
     api_request::ApiError,
     objects::{MangaList, MangaListItem, MangaSort, ReadStatus, Username},
-    MalClient, API_URL, RUNTIME,
+    MalClient, API_URL,
 };
 
 pub const USER_MANGALIST_URL: &str = formatcp!("{API_URL}/users/{{USER_NAME}}/mangalist");
 pub const USER_MANGA_ID: &str = formatcp!("{API_URL}/manga/{{MANGA_ID}}/my_list_status");
 
 #[derive(Debug, Clone)]
-pub struct UserMangaListApi {
-    client: MalClient,
+pub struct UserMangaListApi<'a> {
+    client: &'a MalClient,
 }
 
-impl UserMangaListApi {
-    pub(crate) fn new(mal_client: MalClient) -> Self {
+impl<'a> UserMangaListApi<'a> {
+    pub(crate) fn new(mal_client: &'a MalClient) -> Self {
         Self { client: mal_client }
     }
 
     /// GET user manga list
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get>
-    pub fn get(&self) -> UserMangaListApiGet {
+    pub fn get(&self) -> UserMangaListApiGet<'a> {
         UserMangaListApiGet {
-            client: self.client.clone(),
+            client: self.client,
             user_name: None,
             status: None,
             sort: None,
@@ -46,9 +46,9 @@ impl UserMangaListApi {
     /// This endpoint updates only values specified by the parameter.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put>
-    pub fn put(&self) -> UserMangaListApiPut {
+    pub fn put(&self) -> UserMangaListApiPut<'a> {
         UserMangaListApiPut {
-            client: self.client.clone(),
+            client: self.client,
             manga_id: None,
             status: None,
             is_rereading: None,
@@ -69,9 +69,9 @@ impl UserMangaListApi {
     /// So be careful when retrying.
     ///
     /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_delete>
-    pub fn delete(&self) -> UserMangaListApiDelete {
+    pub fn delete(&self) -> UserMangaListApiDelete<'a> {
         UserMangaListApiDelete {
-            client: self.client.clone(),
+            client: self.client,
             manga_id: None,
         }
     }
@@ -87,9 +87,9 @@ impl UserMangaListApi {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_put>
 #[skip_serializing_none]
 #[derive(Serialize, Debug)]
-pub struct UserMangaListApiPut {
+pub struct UserMangaListApiPut<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
     #[serde(skip)]
     manga_id: Option<u64>,
 
@@ -105,7 +105,7 @@ pub struct UserMangaListApiPut {
     comments: Option<String>,
 }
 
-impl UserMangaListApiPut {
+impl<'a> UserMangaListApiPut<'a> {
     /// The manga id to update. This parameter is required.
     pub fn manga_id(mut self, id: u64) -> Self {
         self.manga_id = Some(id);
@@ -170,12 +170,13 @@ impl UserMangaListApiPut {
         assert!(self.manga_id.is_some(), "manga_id is a required param");
 
         let url = USER_MANGA_ID.replace("{MANGA_ID}", &self.manga_id.unwrap().to_string());
-        self.client.http.put(url, Some(&self), true).await
+        self.client.api_request().put(url, Some(&self), true).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<MangaListItem, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -186,12 +187,12 @@ impl UserMangaListApiPut {
 ///
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/manga_manga_id_my_list_status_delete>
 #[derive(Debug)]
-pub struct UserMangaListApiDelete {
-    client: MalClient,
+pub struct UserMangaListApiDelete<'a> {
+    client: &'a MalClient,
     manga_id: Option<u64>,
 }
 
-impl UserMangaListApiDelete {
+impl<'a> UserMangaListApiDelete<'a> {
     /// The manga id to delete. This parameter is required.
     pub fn manga_id(mut self, id: u64) -> Self {
         self.manga_id = Some(id);
@@ -203,12 +204,13 @@ impl UserMangaListApiDelete {
         assert!(self.manga_id.is_some(), "manga_id is a required param");
 
         let url = USER_MANGA_ID.replace("{MANGA_ID}", &self.manga_id.unwrap().to_string());
-        self.client.http.delete(url, true).await
+        self.client.api_request().delete(url, true).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<(), ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }
 
@@ -217,9 +219,9 @@ impl UserMangaListApiDelete {
 /// <https://myanimelist.net/apiconfig/references/api/v2#operation/users_user_id_mangalist_get>
 #[skip_serializing_none]
 #[derive(Debug, Serialize)]
-pub struct UserMangaListApiGet {
+pub struct UserMangaListApiGet<'a> {
     #[serde(skip)]
-    client: MalClient,
+    client: &'a MalClient,
     #[serde(skip)]
     user_name: Option<Username>,
 
@@ -231,7 +233,7 @@ pub struct UserMangaListApiGet {
     nsfw: Option<bool>,
 }
 
-impl UserMangaListApiGet {
+impl<'a> UserMangaListApiGet<'a> {
     /// The user name to get manga list from. This parameter is required.
     pub fn user_name(mut self, user_name: Username) -> Self {
         self.user_name = Some(user_name);
@@ -291,11 +293,12 @@ impl UserMangaListApiGet {
         // use access token when Me, and client token when other users
         let is_auth = matches!(self.user_name.as_ref().unwrap(), Username::Me);
 
-        self.client.http.get(url, is_auth).await
+        self.client.api_request().get(url, is_auth).await
     }
 
     /// Send the request.
+    #[cfg(feature = "blocking")]
     pub fn send_blocking(self) -> Result<MangaList, ApiError> {
-        RUNTIME.block_on(self.send())
+        crate::RUNTIME.block_on(self.send())
     }
 }

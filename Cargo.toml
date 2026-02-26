@@ -1,6 +1,6 @@
 [package]
 name = "myanimelist"
-version = "0.1.15"
+version = "0.2.0"
 edition = "2021"
 authors = ["Cherry"]
 license = "MIT"
@@ -8,6 +8,9 @@ description = "A complete async/sync typed MyAnimeList v2 api"
 repository = "https://github.com/MolotovCherry/mal-api-rs"
 categories = ["api-bindings"]
 keywords = ["myanimelist", "mal", "api", "anime", "manga"]
+
+[features]
+blocking = []
 
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
@@ -24,4 +27,3 @@ serde_with = "3.17.0"
 serde_qs = "1.0"
 itertools = "0.14"
 tracing = "0.1.44"
-sayuri = "0.1.4"
